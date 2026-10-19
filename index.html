@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f6f1">
+  <title>概率罗盘｜把准备变成底气</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18352d;
+      --muted: #71827a;
+      --green: #17634e;
+      --mint: #dcefe4;
+      --paper: #f4f6f1;
+      --white: #fff;
+      --line: #e4eae2;
+      --orange: #e88c65;
+      --shadow-soft: 0 12px 34px rgba(34, 66, 50, .075);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 89% 2%, rgba(211, 235, 219, .68), transparent 33rem),
+        radial-gradient(ellipse at 8% 54%, rgba(250, 225, 205, .2), transparent 30rem),
+        var(--paper);
+    }
+    button { font: inherit; }
+    .app { width: min(100%, 520px); min-height: 100vh; margin: 0 auto; padding: 22px 24px 38px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 9px; margin-bottom: 31px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 780; letter-spacing: .01em; }
+    .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid rgba(255,255,255,.27); border-radius: 12px; color: white; background: linear-gradient(145deg, #287a5d, #14523f); box-shadow: 0 5px 12px rgba(21,92,73,.17); }
+    .buddy { display: flex; max-width: 190px; flex: 0 1 auto; align-items: center; gap: 7px; padding: 0; border: 0; color: var(--ink); background: transparent; text-align: left; cursor: pointer; }
+    .buddy:focus-visible { outline: 3px solid #96c4a5; outline-offset: 4px; border-radius: 16px; }
+    .buddy-bubble { position: relative; display: grid; min-height: 38px; flex: 1 1 auto; place-items: center; padding: 7px 10px; border: 1px solid #e5e9e2; border-radius: 14px 14px 4px 14px; background: rgba(255,255,255,.88); box-shadow: 0 4px 12px rgba(32,52,43,.045); color: #53645a; font-size: 10px; line-height: 1.4; }
+    .buddy-face { width: 43px; height: 43px; flex: 0 0 43px; overflow: visible; filter: drop-shadow(0 4px 4px rgba(21,92,73,.14)); animation: buddy-float 3s ease-in-out infinite; }
+    .buddy-eye { transform-box: fill-box; transform-origin: center; animation: buddy-blink 5s infinite; }
+    .buddy-mouth { transition: d .2s ease; }
+    .buddy:hover .buddy-face { animation-duration: 1s; }
+    @keyframes buddy-float { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-3px) rotate(2deg); } }
+    @keyframes buddy-blink { 0%, 44%, 48%, 100% { transform: scaleY(1); } 46% { transform: scaleY(.12); } }
+    .eyebrow { color: var(--green); font-size: 10px; font-weight: 760; letter-spacing: .13em; text-transform: uppercase; }
+    .home-kicker { display: inline-flex; min-height: 27px; align-items: center; gap: 7px; padding: 5px 10px; border: 1px solid #e2eae0; border-radius: 20px; color: #416a52; background: rgba(255,255,255,.64); font-size: 10px; font-weight: 720; letter-spacing: .025em; }
+    .home-kicker::before { width: 7px; height: 7px; border-radius: 50%; background: #5b9d6b; box-shadow: 0 0 0 3px rgba(91,157,107,.12); content: ""; }
+    h1, h2, p { margin-top: 0; }
+    h1 { max-width: 390px; margin: 14px 0 12px; font-size: clamp(38px, 10vw, 52px); line-height: 1.06; letter-spacing: -.06em; }
+    h2 { margin-bottom: 10px; font-size: 27px; line-height: 1.2; letter-spacing: -.04em; }
+    .intro { max-width: 400px; margin-bottom: 22px; color: #65776e; font-size: 13px; line-height: 1.8; }
+    .hero-card {
+      position: relative; isolation: isolate; overflow: hidden; min-height: 204px; margin: 24px 0 25px; padding: 24px;
+      border: 1px solid rgba(255,255,255,.2); border-radius: 26px; color: #f7fff9;
+      background: linear-gradient(116deg, #145b45 0%, #1a7155 58%, #276f52 100%);
+      box-shadow: 0 17px 36px rgba(23,92,68,.16);
+    }
+    .hero-card::after { position: absolute; z-index: -1; right: -55px; bottom: -135px; width: 285px; height: 285px; border: 1px solid rgba(255,255,255,.17); border-radius: 50%; content: ""; box-shadow: 0 0 0 22px rgba(255,255,255,.035), 0 0 0 49px rgba(255,255,255,.028), 0 0 0 77px rgba(255,255,255,.02); }
+    .hero-card .eyebrow { color: #c2e5ce; }
+    .hero-card h2 { max-width: 260px; margin: 13px 0 9px; font-size: 27px; line-height: 1.14; letter-spacing: -.04em; }
+    .hero-card p { max-width: min(250px, calc(100% - 112px)); margin: 0; color: #d2e5d8; font-size: 11px; line-height: 1.7; }
+    .sun { position: absolute; right: 48px; top: 40px; width: 58px; height: 58px; border: 1px solid rgba(255,255,255,.55); border-radius: 50%; box-shadow: 0 0 30px rgba(250,219,155,.14); }
+    .sun::after { position: absolute; inset: 9px; border: 1px solid rgba(255,255,255,.45); border-radius: 50%; content: ""; }
+    .cover-mascot { position: absolute; z-index: 1; right: 30px; bottom: 18px; width: 91px; height: 91px; filter: drop-shadow(0 10px 9px rgba(9,43,32,.18)); animation: buddy-float 3.4s ease-in-out infinite; }
+    .section-label { margin: 26px 0 12px; color: #41594d; font-size: 12px; font-weight: 760; letter-spacing: .015em; }
+    .scenario-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; margin-bottom: 15px; }
+    .scenario-option { position: relative; display: flex; min-height: 133px; flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.82); box-shadow: 0 3px 10px rgba(34,66,50,.025); cursor: pointer; text-align: left; transition: border-color .18s, background .18s, transform .18s, box-shadow .18s; }
+    .scenario-option:hover { border-color: #a5c7b0; }
+    .scenario-option.selected { transform: translateY(-1px); border-color: #4e9871; background: linear-gradient(145deg, #eff8f0, #e6f3e9); box-shadow: 0 6px 16px rgba(32,104,69,.09), inset 0 0 0 1px rgba(38,116,75,.15); }
+    .scenario-icon { display: grid; width: 39px; height: 39px; flex: 0 0 39px; place-items: center; border: 1px solid rgba(53,100,73,.07); border-radius: 14px; background: linear-gradient(145deg, #f0f6ed, #e7f1e7); font-size: 18px; }
+    .scenario-option strong, .scenario-option small { display: block; }
+    .scenario-option strong { margin-bottom: 4px; padding-right: 13px; font-size: 12px; line-height: 1.45; }
+    .scenario-option small { color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .scenario-radio { position: absolute; top: 13px; right: 13px; display: grid; width: 19px; height: 19px; place-items: center; border: 1px solid #dce5dc; border-radius: 50%; color: transparent; background: rgba(255,255,255,.65); font-size: 11px; font-weight: 800; }
+    .scenario-option.selected .scenario-radio { border-color: var(--green); color: white; background: var(--green); }
+    .mode-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 13px; }
+    .mode-option { position: relative; min-height: 94px; padding: 14px 30px 14px 14px; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.78); color: var(--ink); text-align: left; cursor: pointer; transition: border-color .18s, background .18s, box-shadow .18s; }
+    .mode-option::after { position: absolute; top: 13px; right: 12px; display: grid; width: 17px; height: 17px; place-items: center; border: 1px solid #dce5dc; border-radius: 50%; color: transparent; background: rgba(255,255,255,.75); font-size: 10px; font-weight: 800; content: ""; }
+    .mode-option[aria-checked="true"]::after { border-color: var(--green); color: white; background: var(--green); content: "✓"; }
+    .mode-option.selected { border-color: #4e9871; background: linear-gradient(145deg, #eff8f0, #e6f3e9); box-shadow: inset 0 0 0 1px rgba(38,116,75,.15); }
+    .mode-option strong, .mode-option small { display: block; }
+    .mode-option strong { margin-bottom: 6px; font-size: 13px; }
+    .mode-option small { color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .participant-card { margin: 18px 0; padding: 16px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.64); }
+    .participant-label { display: block; margin-bottom: 10px; font-size: 12px; font-weight: 700; }
+    .participant-options { display: flex; flex-wrap: wrap; gap: 8px; }
+    .participant-choice { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: white; color: #53615a; font-size: 11px; cursor: pointer; transition: .15s ease; }
+    .participant-choice:has(input:checked) { border-color: var(--green); color: var(--green); background: #eaf4ed; }
+    .participant-choice input { margin: 0; accent-color: var(--green); }
+    .privacy-note { margin: 10px 1px 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .field-wrap { display: grid; gap: 7px; }
+    .field-label { font-size: 12px; font-weight: 700; line-height: 1.55; }
+    .field-hint { color: var(--muted); font-size: 11px; font-weight: 400; line-height: 1.55; }
+    .field-input { width: 100%; min-height: 49px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; outline: 0; color: var(--ink); background: rgba(255,255,255,.9); font: inherit; font-size: 13px; }
+    textarea.field-input { min-height: 112px; resize: vertical; line-height: 1.6; }
+    .field-input:focus { border-color: #5d9b77; box-shadow: 0 0 0 3px rgba(61,152,112,.12); }
+    .field-input::placeholder { color: #a3aca6; }
+    .field-help { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .result-tag { display: inline-flex; align-items: center; min-height: 26px; padding: 5px 9px; border-radius: 9px; color: var(--green); background: #e9f3ec; font-size: 10px; font-weight: 700; }
+    .result-big { margin: 10px 0 5px; font-size: clamp(36px, 11vw, 50px); font-weight: 760; letter-spacing: -.06em; line-height: 1.08; overflow-wrap: anywhere; }
+    .result-subtitle { margin: 0; color: #52645a; font-size: 12px; line-height: 1.7; }
+    .detail-copy { margin: 0; color: #53615a; font-size: 12px; line-height: 1.75; white-space: pre-line; overflow-wrap: anywhere; }
+    .result-question { margin: 0 0 8px; color: #263a31; font-size: 13px; font-weight: 700; line-height: 1.6; overflow-wrap: anywhere; }
+    .feature-row { display: flex; gap: 12px; margin-bottom: 25px; }
+    .feature { flex: 1; padding: 14px 13px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.68); }
+    .feature-icon { display: block; margin-bottom: 8px; font-size: 17px; }
+    .feature strong { display: block; margin-bottom: 4px; font-size: 12px; }
+    .feature span:last-child { color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .primary, .secondary, .text-button { width: 100%; min-height: 52px; border: 0; border-radius: 16px; cursor: pointer; }
+    .primary { color: white; background: linear-gradient(105deg, #17634e, #1d7355); font-weight: 730; box-shadow: 0 8px 20px rgba(21,92,73,.16); }
+    .primary:hover { background: linear-gradient(105deg, #125740, #165f47); }
+    .secondary { border: 1px solid var(--line); color: var(--ink); background: rgba(255,255,255,.88); font-weight: 650; }
+    .text-button { min-height: 40px; margin-top: 8px; color: var(--muted); background: transparent; font-size: 12px; }
+    .footer-note { margin: 15px 5px 0; color: #89938e; font-size: 10px; line-height: 1.6; text-align: center; }
+    .screen { display: none; animation: appear .25s ease-out; }
+    .screen.active { display: block; }
+    @keyframes appear { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .progress-line { height: 4px; margin: -22px 0 29px; overflow: hidden; border-radius: 9px; background: #e4e8e1; }
+    .progress-value { width: 25%; height: 100%; border-radius: inherit; background: var(--green); transition: width .2s ease; }
+    .step-count { margin-bottom: 12px; color: var(--muted); font-size: 11px; }
+    .question-title { margin-bottom: 8px; font-size: 25px; letter-spacing: -.04em; }
+    .question-hint { margin-bottom: 23px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .options { display: grid; gap: 10px; }
+    .option {
+      display: flex; width: 100%; align-items: center; justify-content: space-between; padding: 16px;
+      border: 1px solid var(--line); border-radius: 16px; color: var(--ink); background: rgba(255,255,255,.78);
+      text-align: left; cursor: pointer; transition: border-color .15s, background .15s, transform .15s;
+    }
+    .option:hover { transform: translateY(-1px); border-color: #a5c7b0; }
+    .option.selected { border-color: var(--green); background: #eaf4ed; }
+    .option-title { font-size: 13px; font-weight: 680; }
+    .option-subtitle { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; font-weight: 400; }
+    .option-check { display: grid; width: 20px; height: 20px; flex: 0 0 20px; place-items: center; border: 1px solid #d9e0d9; border-radius: 50%; color: transparent; font-size: 11px; }
+    .option.selected .option-check { border-color: var(--green); color: white; background: var(--green); }
+    .question-actions { display: flex; gap: 10px; margin-top: 28px; }
+    .question-actions .secondary { width: 94px; flex: 0 0 94px; }
+    .question-actions .primary { flex: 1; }
+    .question-error { min-height: 18px; margin: 9px 2px 0; color: #b34c35; font-size: 11px; }
+    .result-head { padding: 19px 20px; border-radius: 21px; background: var(--mint); }
+    .score-line { display: flex; align-items: end; gap: 8px; margin: 14px 0 7px; }
+    .score { font-size: 54px; font-weight: 760; letter-spacing: -.07em; line-height: .95; }
+    .score-unit { padding-bottom: 5px; color: #536b5e; font-size: 12px; }
+    .score-caption { margin: 0; color: #52645a; font-size: 12px; line-height: 1.6; }
+    .result-card { margin-top: 15px; padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: white; }
+    .result-card h3 { margin: 0 0 12px; font-size: 14px; }
+    .factor { margin: 12px 0; }
+    .factor-top { display: flex; justify-content: space-between; margin-bottom: 7px; color: #53615a; font-size: 11px; }
+    .factor-bar { height: 6px; overflow: hidden; border-radius: 9px; background: #edf0eb; }
+    .factor-fill { height: 100%; border-radius: inherit; background: #3d9870; }
+    .factor-fill.low { background: var(--orange); }
+    .advice-list { display: grid; gap: 13px; }
+    .advice { display: flex; gap: 10px; align-items: flex-start; color: #53615a; font-size: 12px; line-height: 1.6; }
+    .advice-num { display: grid; width: 21px; height: 21px; flex: 0 0 21px; place-items: center; border-radius: 8px; color: var(--green); background: #e9f3ec; font-size: 10px; font-weight: 750; }
+    .disclaimer { margin: 13px 2px 17px; color: #89938e; font-size: 10px; line-height: 1.65; }
+    .fortune-card { position: relative; overflow: hidden; padding: 19px; border-radius: 18px; color: #fff8ed; background: #293b36; }
+    .fortune-card::after { position: absolute; right: -15px; bottom: -39px; width: 105px; height: 105px; border: 1px solid rgba(255,255,255,.25); border-radius: 50%; content: ""; box-shadow: 0 0 0 14px rgba(255,255,255,.04); }
+    .fortune-card .eyebrow { color: #d8c49f; }
+    .fortune-card h3 { margin: 8px 0; font-size: 16px; }
+    .fortune-card p { max-width: 260px; margin: 0; color: #d6ded9; font-size: 11px; line-height: 1.65; }
+    .fortune-note { margin: 8px 0 0; color: #aebbb5; font-size: 9px; }
+    .result-actions { display: grid; gap: 8px; margin-top: 17px; }
+    .toast { min-height: 17px; margin: 8px 0 0; color: var(--green); font-size: 11px; text-align: center; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid rgba(80,151,109,.42); outline-offset: 3px; }
+    .scenario-option:active, .mode-option:active, .primary:active { transform: scale(.99); }
+    @media (min-width: 600px) {
+      body { padding: 22px 0; }
+      .app { min-height: calc(100vh - 44px); padding: 28px 32px 38px; border: 1px solid rgba(225,232,222,.9); border-radius: 32px; background: rgba(250,251,247,.84); box-shadow: 0 22px 80px rgba(32,52,43,.085); }
+      .topbar { margin-bottom: 35px; }
+    }
+    @media (max-width: 420px) {
+      .cover-mascot { right: 17px; bottom: 15px; width: 76px; height: 76px; }
+      .hero-card p { max-width: min(230px, calc(100% - 102px)); }
+    }
+    @media (max-width: 360px) {
+      .app { padding-right: 17px; padding-left: 17px; }
+      .brand { gap: 6px; font-size: 12px; }
+      .buddy { gap: 5px; }
+      .buddy-bubble { padding-right: 7px; padding-left: 7px; font-size: 9px; }
+      .buddy-face { width: 39px; height: 39px; flex-basis: 39px; }
+      .scenario-list { gap: 8px; }
+      .scenario-option { min-height: 139px; padding: 11px; }
+      .scenario-icon { width: 35px; height: 35px; flex-basis: 35px; }
+      .scenario-option small { font-size: 9px; }
+      .cover-mascot { right: 15px; width: 76px; height: 76px; }
+      .hero-card { padding: 21px 19px; }
+      .hero-card h2 { max-width: 230px; font-size: 24px; }
+      .hero-card p { max-width: min(178px, calc(100% - 92px)); font-size: 10px; }
+      .hero-card h2 { max-width: 180px; font-size: 23px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✳</span><span>概率罗盘</span></div>
+      <button class="buddy" id="buddy-button" type="button" aria-label="小罗：嗨，我是小罗，一起把问题拆小吧。点击听我说一句">
+        <span class="buddy-bubble" id="buddy-message" aria-live="polite">嗨，我是小罗，一起把问题拆小吧。</span>
+        <svg class="buddy-face" id="buddy-face" viewBox="0 0 64 64" role="img" aria-label="小罗，一只圆圆的绿色小伙伴">
+          <path d="M31 13C23 2 34 1 40 9c8-5 14 1 8 8" fill="#79ba87" stroke="#155c49" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M13 29c0-11 8-18 19-18s19 7 19 18v13c0 10-8 17-19 17S13 52 13 42V29Z" fill="#a7d8a6" stroke="#155c49" stroke-width="2.5"/>
+          <path d="M13 29c-7-2-9 7-3 10 1 1 2 1 4 1m36-11c7-2 9 7 3 10-1 1-2 1-4 1" fill="#a7d8a6" stroke="#155c49" stroke-width="2.5" stroke-linecap="round"/>
+          <ellipse cx="25" cy="34" rx="2.2" ry="3" fill="#173d32" class="buddy-eye"/>
+          <ellipse cx="40" cy="34" rx="2.2" ry="3" fill="#173d32" class="buddy-eye"/>
+          <ellipse cx="20" cy="40" rx="3.2" ry="1.8" fill="#ec9182" opacity=".72"/>
+          <ellipse cx="45" cy="40" rx="3.2" ry="1.8" fill="#ec9182" opacity=".72"/>
+          <path class="buddy-mouth" d="M28 42c2 3 6 3 9 0" fill="none" stroke="#155c49" stroke-width="2" stroke-linecap="round"/>
+          <path d="m52 16 1.6 3.7 4 1.5-4 1.6-1.6 3.8-1.5-3.8-4-1.6 4-1.5 1.5-3.7Z" fill="#efb85e"/>
+        </svg>
+      </button>
+    </header>
+
+    <section class="screen active" id="home" aria-labelledby="home-title">
+      <div class="home-kicker">概率 × 情境 × 下一步行动</div>
+      <h1 id="home-title">好奇的事，<br>一起理清。</h1>
+      <p class="intro">学习、游戏抽卡，或一件正在发生的事。选一个场景，补充信息，小罗陪你拆解概率、证据和未知因素。</p>
+      <div class="hero-card">
+        <div class="sun" aria-hidden="true"></div>
+        <div class="eyebrow">你的问题值得认真看</div>
+        <h2>不靠猜，<br>看看依据在哪里。</h2>
+        <p>能精确计算的就展示公式；资料不足时，也会坦白告诉你还缺什么。</p>
+        <svg class="cover-mascot" viewBox="0 0 100 100" role="img" aria-label="小罗陪你一起分析">
+          <circle cx="50" cy="53" r="44" fill="rgba(235,255,238,.13)"/>
+          <path d="M48 27C37 13 51 7 59 20c10-7 20 2 10 12" fill="#f1c875" stroke="#155c49" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 50c0-17 13-28 31-28s31 11 31 28v18c0 16-13 27-31 27S19 84 19 68V50Z" fill="#b4e2aa" stroke="#155c49" stroke-width="3"/>
+          <path d="M19 48c-10-3-14 10-5 15 2 1 4 2 7 1m60-16c10-3 14 10 5 15-2 1-4 2-7 1" fill="#b4e2aa" stroke="#155c49" stroke-width="3" stroke-linecap="round"/>
+          <ellipse cx="39" cy="57" rx="3" ry="4" fill="#193e32"/>
+          <ellipse cx="61" cy="57" rx="3" ry="4" fill="#193e32"/>
+          <ellipse cx="31" cy="66" rx="4" ry="2.5" fill="#ec9182" opacity=".8"/>
+          <ellipse cx="69" cy="66" rx="4" ry="2.5" fill="#ec9182" opacity=".8"/>
+          <path d="M44 70c3 4 9 4 12 0" fill="none" stroke="#155c49" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="m79 27 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" fill="#f4d990"/>
+        </svg>
+      </div>
+      <div class="section-label">你想一起分析什么？</div>
+      <div class="scenario-list" role="radiogroup" aria-label="选择分析场景">
+        <button class="scenario-option selected" type="button" data-scenario="study" role="radio" aria-checked="true">
+          <span class="scenario-icon" aria-hidden="true">📚</span><span><strong>学习与考试</strong><small>准备状态、复习节奏与下一步建议</small></span><span class="scenario-radio" aria-hidden="true">●</span>
+        </button>
+        <button class="scenario-option" type="button" data-scenario="gacha" role="radio" aria-checked="false">
+          <span class="scenario-icon" aria-hidden="true">🎴</span><span><strong>游戏抽卡</strong><small>根据卡池概率、抽数和目标保底计算</small></span><span class="scenario-radio" aria-hidden="true">○</span>
+        </button>
+        <button class="scenario-option" type="button" data-scenario="event" role="radio" aria-checked="false">
+          <span class="scenario-icon" aria-hidden="true">🔎</span><span><strong>一件事发生的可能性</strong><small>梳理时间范围、证据和关键未知</small></span><span class="scenario-radio" aria-hidden="true">○</span>
+        </button>
+        <button class="scenario-option" type="button" data-scenario="custom" role="radio" aria-checked="false">
+          <span class="scenario-icon" aria-hidden="true">💭</span><span><strong>自定义问题</strong><small>把你真正好奇的事情告诉小罗</small></span><span class="scenario-radio" aria-hidden="true">○</span>
+        </button>
+      </div>
+      <div class="section-label">选择分析深度</div>
+      <div class="mode-list" role="radiogroup" aria-label="选择分析模式">
+        <button class="mode-option selected" type="button" data-mode="simple" role="radio" aria-checked="true">
+          <strong>☀ 简便模式</strong><small>少量关键问题，快速得到清晰的参考结果。</small>
+        </button>
+        <button class="mode-option" type="button" data-mode="precise" role="radio" aria-checked="false">
+          <strong>◎ 精确模式</strong><small>补充更多条件、规则和假设，做更细的条件分析。</small>
+        </button>
+      </div>
+      <p class="privacy-note" style="margin-top:-5px">精确模式代表输入与分析更详细；现实事件若缺少可靠数据，仍不会虚构精确概率。</p>
+      <div class="participant-card">
+        <span class="participant-label">这次是替谁来问？</span>
+        <div class="participant-options">
+          <label class="participant-choice"><input type="radio" name="participant" value="self" checked> 为我自己</label>
+          <label class="participant-choice"><input type="radio" name="participant" value="other"> 帮别人代问</label>
+        </div>
+        <p class="privacy-note" id="privacy-note">仅在本设备临时分析，不会保存回答。代问时请先征得对方同意；不必填写姓名或其他身份信息。</p>
+      </div>
+      <button class="primary" id="start-button">开始简便分析 <span aria-hidden="true">→</span></button>
+      <p class="footer-note">不同场景会询问不同信息 · 不提供无依据的“运气百分比”</p>
+    </section>
+
+    <section class="screen" id="quiz" aria-labelledby="question-title">
+      <div class="progress-line" id="progress-line" role="progressbar" aria-label="问答进度" aria-valuemin="1" aria-valuemax="1" aria-valuenow="1">
+        <div class="progress-value" id="progress-value"></div>
+      </div>
+      <div class="step-count" id="step-count"></div>
+      <h2 class="question-title" id="question-title"></h2>
+      <p class="question-hint" id="question-hint"></p>
+      <div class="options" id="options" role="group"></div>
+      <p class="question-error" id="question-error" aria-live="polite"></p>
+      <div class="question-actions">
+        <button class="secondary" id="back-button">返回</button>
+        <button class="primary" id="next-button">继续 <span aria-hidden="true">→</span></button>
+      </div>
+      <p class="footer-note">回答仅用于本次情境分析，不会被保存。</p>
+    </section>
+
+    <section class="screen" id="result" aria-labelledby="result-title">
+      <div class="eyebrow" id="result-eyebrow">YOUR ANALYSIS</div>
+      <h2 id="result-title" style="margin-top:10px">情境分析结果</h2>
+      <div id="result-content"></div>
+      <div class="result-actions">
+        <button class="primary" id="copy-button">复制分析摘要</button>
+        <button class="secondary" id="retry-button">重新推演</button>
+        <button class="text-button" id="home-button">回到首页</button>
+        <p class="toast" id="toast" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const studyQuestions = [
+      { key: "days", title: "距离考试还有多久？", hint: "时间会影响复习安排，但不单独决定结果。", type: "radio", options: [{ title: "不到 3 天", value: 1 }, { title: "3 天到 2 周", value: 2 }, { title: "超过 2 周", value: 3 }] },
+      { key: "practice", title: "最近的练习情况怎么样？", hint: "按最近一次真实练习来选，不需要追求完美。", type: "radio", options: [{ title: "还没开始系统练习", subtitle: "目前主要在熟悉内容", value: 1 }, { title: "做过一些练习", subtitle: "知道部分薄弱环节", value: 2 }, { title: "完成过模拟或自测", subtitle: "有复盘练习结果", value: 3 }] },
+      { key: "mock", title: "你对目前掌握程度有多确定？", hint: "有没有通过练习检验过自己的判断？", type: "radio", preciseOnly: true, options: [{ title: "不太确定", subtitle: "还没有做过接近真实的自测", value: 1 }, { title: "有一些把握", subtitle: "做过部分练习，但还没完整检验", value: 2 }, { title: "比较清楚", subtitle: "做过模拟，也知道薄弱点", value: 3 }] },
+      { key: "routine", title: "最近一周，你的休息节奏如何？", hint: "恢复精力也是准备的一部分。", type: "radio", preciseOnly: true, options: [{ title: "经常睡不够或作息很乱", value: 1 }, { title: "有几天休息得不错", value: 2 }, { title: "大多时候休息比较规律", value: 3 }] },
+      { key: "plan", title: "接下来有具体的复习计划吗？", hint: "计划不必复杂，知道先做什么就有帮助。", type: "radio", options: [{ title: "还没有，想到什么学什么", value: 1 }, { title: "有大致方向，但不太固定", value: 2 }, { title: "有安排，也会根据练习调整", value: 3 }] }
+    ];
+    const eventQuestions = [
+      { key: "question", title: "你想分析什么事情？", hint: "尽量说清楚“什么事、在什么时间范围内”。避免填写姓名、联系方式等个人信息。", type: "textarea", placeholder: "例如：这个月内，我有机会收到实习面试回复吗？", maxLength: 240 },
+      { key: "horizon", title: "你关心的时间范围是？", hint: "同一件事在不同时间范围内，机会可能不同。", type: "radio", options: [{ title: "接下来几天" }, { title: "接下来几周" }, { title: "接下来几个月" }, { title: "其他或不确定" }] },
+      { key: "evidence", title: "目前有哪些相关依据？", hint: "只记录你确实知道的情况，不确定的也可以直说。", type: "radio", options: [{ title: "有公开数据或明确规则", subtitle: "可查证的统计、规则或官方信息", value: "strong" }, { title: "有一些相似经历或线索", subtitle: "但样本少，未必能代表这次", value: "some" }, { title: "主要是直觉或暂时没有资料", subtitle: "目前缺少可核对的信息", value: "little" }] },
+      { key: "control", title: "你能影响这件事的哪些部分？", hint: "区分可控行动和外部因素，有助于找到下一步。", type: "radio", preciseOnly: true, options: [{ title: "可以主动采取不少行动", value: "high" }, { title: "只能影响其中一部分", value: "some" }, { title: "大多由外部条件决定", value: "low" }] },
+      { key: "baseRate", title: "有可信的基准概率或历史发生率吗？", hint: "没有就留空。只有在数据确实适用于类似情境时，才值得计算。", type: "number", optional: true, preciseOnly: true, min: 0, max: 100, step: "any", placeholder: "例如 12.5", help: "输入 0–100 的百分数；不要把主观感觉当作统计数据。" },
+      { key: "trials", title: "在这个时间范围内，大约有几次类似机会？", hint: "没有可重复机会时留空；“一次机会”也请填 1。", type: "number", optional: true, preciseOnly: true, min: 1, max: 100000, step: 1, placeholder: "例如 3", help: "仅在每次机会近似独立、概率不变时，才可用重复试验公式。" }
+    ];
+    const customQuestions = [
+      { key: "question", title: "把你真正好奇的问题写下来", hint: "尽量写成一个具体问题；避免填写姓名、联系方式或其他敏感信息。", type: "textarea", placeholder: "例如：如果我每周坚持练琴三次，一个月后能完整弹下这首曲子吗？", maxLength: 240 },
+      { key: "context", title: "你已经知道哪些情况？", hint: "补充会影响结果的背景、做过的尝试，或目前还不确定的地方。", type: "textarea", placeholder: "写下你认为相关的信息；没有也可以填“目前没有”。", maxLength: 300 },
+      { key: "horizon", title: "你关心的时间范围是？", type: "radio", options: [{ title: "接下来几天" }, { title: "接下来几周" }, { title: "接下来几个月" }, { title: "其他或不确定" }] },
+      { key: "evidence", title: "目前的依据主要是什么？", type: "radio", options: [{ title: "有可查证的数据或明确规则", value: "strong" }, { title: "有少量相似经验或线索", value: "some" }, { title: "主要是直觉或还没有资料", value: "little" }] },
+      { key: "baseRate", title: "有没有适用于类似情境的基准概率？", hint: "如无可靠数据，留空即可；系统不会替你编造一个数值。", type: "number", optional: true, preciseOnly: true, min: 0, max: 100, step: "any", placeholder: "百分数，例如 20", help: "只有已知单次机会概率时才填写。" },
+      { key: "trials", title: "类似机会会重复发生几次？", hint: "只有当机会之间近似独立、概率大致不变时才适用。", type: "number", optional: true, preciseOnly: true, min: 1, max: 100000, step: 1, placeholder: "例如 4", help: "不适用时留空。" }
+    ];
+    const gachaQuestions = [
+      { key: "target", title: "你想抽到的目标是什么？", hint: "写角色、道具或卡池名称即可，不需要填写账号信息。", type: "text", placeholder: "例如：限定角色 A", maxLength: 80 },
+      { key: "rate", title: "游戏公布的单抽目标概率是多少？", hint: "请查卡池公告；如果是总稀有度概率，不要误当成目标概率。", type: "number", min: 0, max: 100, step: "any", placeholder: "百分数，例如 0.6", help: "输入目标在一次普通抽取中直接出现的概率（0–100%）。" },
+      { key: "pulls", title: "这次计划抽多少次？", hint: "请输入本次预算内的总抽数。", type: "number", min: 1, max: 10000, step: 1, placeholder: "例如 80" },
+      { key: "pity", title: "最晚多少抽触发保底？", hint: "填目标保底所在的总抽数；没有或不清楚就填 0。", type: "number", preciseOnly: true, min: 0, max: 10000, step: 1, placeholder: "例如 90；无保底填 0" },
+      { key: "progress", title: "你现在已有多少抽保底进度？", hint: "填本轮已经抽过、尚未触发该保底的抽数。若保底填 0，这里也填 0。", type: "number", preciseOnly: true, min: 0, max: 10000, step: 1, placeholder: "例如 35" },
+      { key: "targetGuaranteed", title: "这个保底会直接保证你要的目标吗？", hint: "有些卡池只保证出稀有度，不保证指定目标。", type: "radio", preciseOnly: true, options: [{ title: "会，保底直接给目标", value: "yes" }, { title: "不会，只保证稀有度或其他结果", value: "no" }, { title: "不确定", value: "unknown" }] }
+    ];
+    const scenarioData = {
+      study: { label: "学习与考试", questions: studyQuestions },
+      gacha: { label: "游戏抽卡", questions: gachaQuestions },
+      event: { label: "事件概率", questions: eventQuestions },
+      custom: { label: "自定义问题", questions: customQuestions }
+    };
+    const evidenceLabels = { strong: "有公开数据或明确规则", some: "有少量相似经验或线索", little: "主要是直觉或暂时没有资料" };
+    const controlLabels = { high: "可以采取不少行动", some: "能影响其中一部分", low: "大多由外部条件决定" };
+    const factorLabels = { days: "可用复习时间", practice: "练习与自测", mock: "掌握程度的验证", routine: "休息与精力", plan: "计划清晰度" };
+    const studyTips = {
+      days: ["先圈出最重要的 1–2 个考点，避免临时铺得太开。", "把剩余时间拆成复习、练习和休息几个小段。", "按阶段安排复习，并预留时间做一次自测。"],
+      practice: ["从一小组代表性题目开始，找出最值得补的知识点。", "整理错题，挑一个薄弱点做针对练习。", "练习后复盘错误原因，不只看对错。"],
+      mock: ["做一组短测，先建立对当前状态的实际认识。", "尝试一次限时练习，记录最不确定的部分。", "继续用模拟结果更新复习重点。"],
+      routine: ["今晚优先保证休息，避免疲惫硬撑。", "给复习安排固定的休息间隔，留意精力变化。", "保持已有的休息节奏，避免临近考试大幅改变。"],
+      plan: ["写下今天要完成的一件小事。", "把大目标改写成一个可检查的小任务。", "每次自测后更新计划，把时间留给薄弱点。"]
+    };
+    const fortunes = [
+      ["今日微小好运", "把最难的那一页翻开，开始的五分钟可能比想象中轻松。"],
+      ["给专注一点空间", "收起一个分心来源，为自己留出一段安静时间。"],
+      ["好运提示：先做一步", "不必一次想完所有事，完成眼前的小任务就很好。"],
+      ["给自己一个缓冲", "喝口水、伸个懒腰，再带着清醒继续下一步。"]
+    ];
+    const answers = {};
+    const screens = [...document.querySelectorAll(".screen")];
+    const optionList = document.getElementById("options");
+    const errorMessage = document.getElementById("question-error");
+    let scenario = "study";
+    let analysisMode = "simple";
+    let questions = scenarioData.study.questions;
+    let questionIndex = 0;
+    let buddyMessageIndex = 0;
+    const participantMessages = {
+      home: ["嗨，我是小罗，想分析哪件事？", "有依据我们就算，没有依据也会告诉你。", "替朋友代问也可以，记得先征得同意哦。"],
+      quiz: ["慢慢来，信息越清楚，分析越有帮助。", "不确定的地方可以如实回答。", "一步一步来，我们一起拆解。"],
+      result: ["这里展示的是依据和假设，不是命运预言。", "结果不确定时，我们也会把未知说明白。", "挑一个你能做的小行动，先从那里开始。"]
+    };
+
+    function buddySay(message) {
+      document.getElementById("buddy-message").textContent = message;
+      document.getElementById("buddy-button").setAttribute("aria-label", `小罗说：${message} 点击听我说一句`);
+    }
+
+    function showScreen(id) {
+      screens.forEach((screen) => screen.classList.toggle("active", screen.id === id));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function makeField(question) {
+      const wrap = document.createElement("label");
+      wrap.className = "field-wrap";
+      const label = document.createElement("span");
+      label.className = "field-label";
+      label.textContent = question.title;
+      if (question.optional) label.textContent += "（选填）";
+      if (question.hint) {
+        const hint = document.createElement("span");
+        hint.className = "field-hint";
+        hint.textContent = question.hint;
+        label.append(document.createElement("br"), hint);
+      }
+      const input = document.createElement(question.type === "textarea" ? "textarea" : "input");
+      input.className = "field-input";
+      input.id = "current-answer";
+      input.name = question.key;
+      input.placeholder = question.placeholder || "";
+      if (question.type !== "textarea") input.type = question.type;
+      if (question.type === "number") {
+        input.inputMode = question.step === 1 ? "numeric" : "decimal";
+        input.min = String(question.min);
+        input.max = String(question.max);
+        input.step = String(question.step);
+      }
+      if (question.maxLength) input.maxLength = question.maxLength;
+      input.value = answers[question.key] ?? "";
+      input.required = !question.optional;
+      input.setAttribute("aria-label", question.title);
+      wrap.append(label, input);
+      if (question.help) {
+        const help = document.createElement("span");
+        help.className = "field-help";
+        help.textContent = question.help;
+        wrap.append(help);
+      }
+      return wrap;
+    }
+
+    function renderQuestion() {
+      const question = questions[questionIndex];
+      document.getElementById("step-count").textContent = `${analysisMode === "simple" ? "简便" : "精确"}模式 · ${scenarioData[scenario].label} · 问题 ${questionIndex + 1} / ${questions.length}`;
+      document.getElementById("progress-line").setAttribute("aria-valuemax", String(questions.length));
+      document.getElementById("progress-line").setAttribute("aria-valuenow", String(questionIndex + 1));
+      document.getElementById("progress-value").style.width = `${((questionIndex + 1) / questions.length) * 100}%`;
+      document.getElementById("question-title").textContent = question.title;
+      document.getElementById("question-hint").textContent = question.hint || "";
+      document.getElementById("back-button").textContent = questionIndex === 0 ? "退出" : "上一步";
+      document.getElementById("next-button").innerHTML = questionIndex === questions.length - 1 ? "查看详细分析 <span aria-hidden=\"true\">→</span>" : "继续 <span aria-hidden=\"true\">→</span>";
+      errorMessage.textContent = "";
+      optionList.replaceChildren();
+      if (question.type === "radio") {
+        question.options.forEach((option) => {
+          const optionValue = option.value === undefined ? option.title : option.value;
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `option${answers[question.key] === optionValue ? " selected" : ""}`;
+          button.setAttribute("aria-pressed", String(answers[question.key] === optionValue));
+          const copy = document.createElement("span");
+          const title = document.createElement("span");
+          title.className = "option-title";
+          title.textContent = option.title;
+          copy.append(title);
+          if (option.subtitle) {
+            const subtitle = document.createElement("span");
+            subtitle.className = "option-subtitle";
+            subtitle.textContent = option.subtitle;
+            copy.append(subtitle);
+          }
+          const check = document.createElement("span");
+          check.className = "option-check";
+          check.setAttribute("aria-hidden", "true");
+          check.textContent = "✓";
+          button.append(copy, check);
+          button.addEventListener("click", () => {
+            answers[question.key] = optionValue;
+            renderQuestion();
+            buddySay("收到！这些信息会帮助我把分析做得更具体。");
+          });
+          optionList.append(button);
+        });
+      } else {
+        optionList.append(makeField(question));
+      }
+      buddySay(questionIndex === 0 ? "慢慢来，我陪你把问题理清楚。" : participantMessages.quiz[questionIndex % participantMessages.quiz.length]);
+    }
+
+    function commitCurrentAnswer() {
+      const question = questions[questionIndex];
+      if (question.type === "radio") {
+        if (answers[question.key] === undefined) {
+          errorMessage.textContent = "请选择一个最符合当前情况的选项。";
+          return false;
+        }
+        return true;
+      }
+      const input = document.getElementById("current-answer");
+      const value = input.value.trim();
+      if (!value && question.optional) {
+        answers[question.key] = "";
+        return true;
+      }
+      if (!value) {
+        errorMessage.textContent = question.type === "number" ? "请填写有效数字；不适用时可留空（如果该项是选填）。" : "请填写这一项，或在上一步补充信息。";
+        input.focus();
+        return false;
+      }
+      if (question.type === "number") {
+        const number = Number(value);
+        if (!Number.isFinite(number) || number < question.min || number > question.max || (question.step === 1 && !Number.isInteger(number))) {
+          errorMessage.textContent = `请输入 ${question.min} 到 ${question.max} 范围内的有效${question.step === 1 ? "整数" : "数字"}。`;
+          input.focus();
+          return false;
+        }
+      }
+      answers[question.key] = value;
+      return true;
+    }
+
+    function node(tag, className, text) {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      if (text !== undefined) element.textContent = text;
+      return element;
+    }
+
+    function addCard(title, content) {
+      const card = node("section", "result-card");
+      card.append(node("h3", "", title));
+      if (typeof content === "string") card.append(node("p", "detail-copy", content));
+      else card.append(content);
+      document.getElementById("result-content").append(card);
+      return card;
+    }
+
+    function addSummary(tag, title, description) {
+      const card = node("div", "result-head");
+      card.append(node("span", "result-tag", tag), node("div", "result-big", title), node("p", "result-subtitle", description));
+      document.getElementById("result-content").append(card);
+    }
+
+    function resultAudience() {
+      return document.querySelector('input[name="participant"]:checked').value === "other" ? "帮别人代问" : "为自己分析";
+    }
+
+    function formatPercent(probability) {
+      return `${new Intl.NumberFormat("zh-CN", { maximumSignificantDigits: 4 }).format(probability * 100)}%`;
+    }
+
+    function probabilityAtLeastOnce(rate, trials) {
+      if (rate >= 1) return 1;
+      if (rate <= 0 || trials <= 0) return 0;
+      return -Math.expm1(trials * Math.log1p(-rate));
+    }
+
+    function renderStudyResult() {
+      const weights = analysisMode === "simple"
+        ? { days: 25, practice: 40, plan: 35 }
+        : { days: 15, practice: 25, mock: 25, routine: 15, plan: 20 };
+      const factors = questions.map((question) => ({ key: question.key, value: Number(answers[question.key]) }));
+      const score = Math.round(factors.reduce((sum, factor) => sum + factor.value / 3 * weights[factor.key], 0));
+      const caption = score >= 75
+        ? "从你的回答看，已经建立了较好的准备基础。继续用练习发现薄弱点，并保持休息。"
+        : score >= 50
+          ? "目前有一些准备基础。挑一个最能改善的因素，采取一件具体行动。"
+          : "当前还有可调整的空间。先从最小的一步开始，不必把这个分数当成考试预测。";
+      addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 学习准备参考`, `${score} / 100`, caption);
+      const factorList = document.createElement("div");
+      factors.forEach((factor) => {
+        const row = node("div", "factor");
+        const top = node("div", "factor-top");
+        top.append(node("span", "", factorLabels[factor.key]), node("span", "", ["可优先改善", "正在建立", "当前优势"][factor.value - 1]));
+        const bar = node("div", "factor-bar");
+        const fill = node("div", `factor-fill${factor.value === 1 ? " low" : ""}`);
+        fill.style.width = `${factor.value / 3 * 100}%`;
+        bar.append(fill);
+        row.append(top, bar);
+        factorList.append(row);
+      });
+      addCard("影响因素拆解", factorList);
+      const sorted = [...factors].sort((first, second) => first.value - second.value);
+      const advice = document.createElement("div");
+      advice.className = "advice-list";
+      sorted.slice(0, 3).forEach((factor, index) => {
+        const row = node("div", "advice");
+        row.append(node("span", "advice-num", String(index + 1).padStart(2, "0")), node("span", "", studyTips[factor.key][factor.value - 1]));
+        advice.append(row);
+      });
+      addCard("按当前情况优先尝试", advice);
+      addCard("解读边界", `这是${analysisMode === "simple" ? "根据少量回答生成的快速启发式参考" : "根据更多准备因素生成的启发式参考"}，只把回答按预设权重汇总；没有经过考试结果数据校准，不是通过率或考试结果预测。`);
+      const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+      const fun = node("div", "fortune-card");
+      fun.append(node("div", "eyebrow", "JUST FOR FUN · 趣味彩蛋"), node("h3", "", fortune[0]), node("p", "", fortune[1]), node("p", "fortune-note", "纯属娱乐，不用于预测真实事件。"));
+      document.getElementById("result-content").append(fun);
+    }
+
+    function renderGachaResult() {
+      const rate = Number(answers.rate) / 100;
+      const pulls = Number(answers.pulls);
+      const pity = analysisMode === "precise" ? Number(answers.pity) : 0;
+      const progress = analysisMode === "precise" ? Number(answers.progress) : 0;
+      const targetGuaranteed = analysisMode === "precise" && answers.targetGuaranteed === "yes";
+      const remaining = pity > 0 ? pity - progress : 0;
+      let probability = probabilityAtLeastOnce(rate, pulls);
+      if (targetGuaranteed && pity > 0 && pulls >= remaining) probability = 1;
+      const target = answers.target;
+      const interpretation = probability >= 0.9
+        ? "在所填假设下，至少获得一次目标的计算概率较高；这仍不代表一定会发生。"
+        : probability >= 0.5
+          ? "在所填假设下，结果仍有明显不确定性；建议先确认资源上限，再决定是否抽取。"
+          : "在所填假设下，未获得目标仍是更可能出现的结果。请先设定可承受的资源上限。";
+      addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 抽卡条件概率`, formatPercent(probability), `计划抽取 ${pulls} 次，目标：${target}。${interpretation}`);
+      addCard("计算使用的条件", `目标单抽概率：${formatPercent(rate)}\n本次计划抽数：${pulls}\n${analysisMode === "simple" ? "简便模式暂不询问保底，按无保底的普通单抽概率计算。" : pity > 0 ? `保底阈值：${pity} 抽；当前进度：${progress} 抽；距离阈值还有 ${remaining} 抽。\n目标直保底：${targetGuaranteed ? "是" : answers.targetGuaranteed === "no" ? "否" : "不确定，按不保证目标处理"}` : "按你提供的信息：没有目标直保底机制。"}\n计算结果针对“至少获得一次指定目标”。`);
+      const formula = targetGuaranteed && pity > 0 && pulls >= remaining
+        ? `你填写的规则表示，距离目标保底还需 ${remaining} 抽，且计划抽数足以到达该保底，因此模型结果为 100%。`
+        : `按普通抽取固定概率近似：P(至少一次) = 1 − (1 − p)^n，其中 p = ${formatPercent(rate)}，n = ${pulls}。`;
+      addCard("计算方法", `${formula}\n${analysisMode === "precise" && pity > 0 ? "保底不保证目标或规则不确定时，不把它当作目标必得；只按普通目标单抽概率计算。" : ""}`);
+      addCard("重要假设与限制", `${analysisMode === "simple" ? "这是快速估算，暂未计入保底、软保底、歪后必得或概率递增机制。" : "假设每抽目标概率恒定、抽取彼此独立，且没有未输入的软保底、歪后必得或概率递增机制。"}若游戏公告机制不同，结果会偏离；请以该卡池官方规则为准。该计算不代表抽卡建议，也不应促使超出预算消费。`);
+    }
+
+    function renderEventResult() {
+      const hasRate = answers.baseRate !== undefined && answers.baseRate !== "";
+      const hasTrials = answers.trials !== undefined && answers.trials !== "";
+      const question = answers.question;
+      if (hasRate && hasTrials) {
+        const probability = probabilityAtLeastOnce(Number(answers.baseRate) / 100, Number(answers.trials));
+        addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 基于你提供的基准率`, formatPercent(probability), `在 ${answers.trials} 次机会内至少发生一次的模型结果。注意：这不是对该事件真实发生率的独立验证。`);
+        addCard("输入条件", `问题：${question}\n关注时间：${answers.horizon}\n你提供的单次基准概率：${answers.baseRate}%\n机会次数：${answers.trials}`);
+        addCard("计算方法和限制", `采用 P(至少一次) = 1 − (1 − p)^n，p = ${answers.baseRate}%，n = ${answers.trials}。仅当基准率适用于类似情境、每次机会近似独立且概率不变时成立。\n现实事件常受共同因素影响，机会未必独立；请核对来源、样本范围和时间是否匹配。`);
+      } else {
+        addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 证据梳理`, "目前无法可靠量化", "仅凭问题描述和有限线索，无法给出可信的发生概率；展示一个看似精确的百分比会误导你。");
+        addCard("你关心的情境", `问题：${question}\n时间范围：${answers.horizon}`);
+        addCard("现有依据", `证据情况：${evidenceLabels[answers.evidence]}\n你能影响的部分：${controlLabels[answers.control]}`);
+        addCard("还缺少哪些信息", "• 清晰的事件定义：什么情况才算“发生”？\n• 可比较的样本：相似对象、相似条件下有多少次成功与未成功？\n• 时间与机会：统计周期是否和你关心的期限一致？\n• 关键条件：有哪些因素会明显改变结果？");
+        addCard("下一步", answers.control === "high"
+          ? "列出一项近期可采取的行动，并找一个可核实的资料来源。行动可以改善条件，但不能保证结果。"
+          : answers.control === "some"
+            ? "把可控部分与外部因素分开；先处理可控的一项，再观察是否出现新证据。"
+            : answers.control === "low"
+              ? "优先寻找可靠的基准数据，或准备几个可能结果的应对方案。对暂时不可控的事件，不必把不确定性归因于运气。"
+              : "先找一个能核实的资料来源，再把可能影响结果的因素列出来。暂时没有基准数据时，不把直觉当成概率。");
+        if (hasRate !== hasTrials) addCard("未使用不完整的数字输入", "基准概率和重复机会数需要同时提供；目前只填写了一项，因此没有据此计算，避免暗中补假设。");
+      }
+    }
+
+    function renderCustomResult() {
+      const hasRate = answers.baseRate !== undefined && answers.baseRate !== "";
+      const hasTrials = answers.trials !== undefined && answers.trials !== "";
+      if (hasRate && hasTrials) {
+        const probability = probabilityAtLeastOnce(Number(answers.baseRate) / 100, Number(answers.trials));
+        addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 自定义条件计算`, formatPercent(probability), `这是按你输入的基准概率和机会次数计算的数学结果，不是对现实情境的验证。`);
+        addCard("你的问题与背景", `问题：${answers.question}\n补充情况：${answers.context}\n关注时间：${answers.horizon}\n依据类型：${evidenceLabels[answers.evidence]}`);
+        addCard("计算方法与限制", `P(至少一次) = 1 − (1 − p)^n，p = ${answers.baseRate}%，n = ${answers.trials}。\n要求各次机会近似独立、概率稳定，且基准率适用于当前问题。若这些条件不成立，数值不应直接解读为现实机会。`);
+      } else {
+        addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 自定义情境拆解`, "先看依据，再谈概率", "我们先把问题、背景和证据分开；没有适用的基准数据时，不会替现实问题编造一个百分比。");
+        addCard("你的问题", `问题：${answers.question}\n关注时间：${answers.horizon}`);
+        addCard("补充情境", `你提供的信息：${answers.context}\n现有依据：${evidenceLabels[answers.evidence]}`);
+        addCard("进一步分析时可以核对", "• 明确成功或发生的判断标准。\n• 寻找与当前对象和时间范围匹配的数据。\n• 检查是否有遗漏的关键条件或相反证据。\n• 将可控行动与外部结果分开考虑。");
+        if (hasRate !== hasTrials) addCard("数字条件不足", "基准概率和机会次数需要同时提供，才可计算至少发生一次的概率；当前只填写了一项，因此未计算。");
+      }
+    }
+
+    function buildResult() {
+      const container = document.getElementById("result-content");
+      container.replaceChildren();
+      document.getElementById("result-title").textContent = `${scenarioData[scenario].label}分析`;
+      document.getElementById("result-eyebrow").textContent = `${resultAudience()} · ${analysisMode === "simple" ? "简便模式" : "精确模式"}`;
+      if (scenario === "study") renderStudyResult();
+      if (scenario === "gacha") renderGachaResult();
+      if (scenario === "event") renderEventResult();
+      if (scenario === "custom") renderCustomResult();
+      document.getElementById("toast").textContent = "";
+      buddySay(scenario === "gacha"
+        ? "这是按卡池条件算出的概率，先确认保底规则和预算哦。"
+        : scenario === "study"
+          ? "分数只帮你整理准备情况，不是考试结果预言。"
+          : "信息不够时不乱猜，本身也是认真分析的一部分。");
+      showScreen("result");
+    }
+
+    document.querySelectorAll(".scenario-option").forEach((button) => {
+      button.addEventListener("click", () => {
+        scenario = button.dataset.scenario;
+        document.querySelectorAll(".scenario-option").forEach((item) => {
+          const selected = item === button;
+          item.classList.toggle("selected", selected);
+          item.setAttribute("aria-checked", String(selected));
+          item.querySelector(".scenario-radio").textContent = selected ? "●" : "○";
+        });
+      });
+    });
+    document.querySelectorAll(".mode-option").forEach((button) => {
+      button.addEventListener("click", () => {
+        analysisMode = button.dataset.mode;
+        document.querySelectorAll(".mode-option").forEach((item) => {
+          const selected = item === button;
+          item.classList.toggle("selected", selected);
+          item.setAttribute("aria-checked", String(selected));
+        });
+        document.getElementById("start-button").innerHTML = `开始${analysisMode === "simple" ? "简便" : "精确"}分析 <span aria-hidden="true">→</span>`;
+      });
+    });
+    document.getElementById("start-button").addEventListener("click", () => {
+      questions = scenarioData[scenario].questions.filter((question) => analysisMode === "precise" || !question.preciseOnly);
+      Object.keys(answers).forEach((key) => delete answers[key]);
+      questionIndex = 0;
+      renderQuestion();
+      showScreen("quiz");
+    });
+    document.getElementById("back-button").addEventListener("click", () => {
+      if (questionIndex === 0) {
+        showScreen("home");
+        return;
+      }
+      questionIndex -= 1;
+      renderQuestion();
+    });
+    document.getElementById("next-button").addEventListener("click", () => {
+      if (!commitCurrentAnswer()) return;
+      if (scenario === "gacha" && questions[questionIndex].key === "progress" && Number(answers.pity) > 0 && Number(answers.progress) >= Number(answers.pity)) {
+        errorMessage.textContent = "当前保底进度应小于保底阈值；若已触发，请更新到新一轮进度。";
+        return;
+      }
+      if (scenario === "gacha" && questions[questionIndex].key === "progress" && Number(answers.pity) === 0 && Number(answers.progress) !== 0) {
+        errorMessage.textContent = "已选择无目标保底时，请将保底进度填为 0。";
+        return;
+      }
+      if (scenario !== "gacha" && ["event", "custom"].includes(scenario) && questions[questionIndex].key === "trials") {
+        if ((answers.baseRate || "") === "" && (answers.trials || "") !== "") {
+          errorMessage.textContent = "填写了机会次数，还需要提供适用的单次基准概率；或者清空本项。";
+          return;
+        }
+        if ((answers.baseRate || "") !== "" && (answers.trials || "") === "") {
+          errorMessage.textContent = "填写了基准概率，还需要提供机会次数；或者返回清空基准率。";
+          return;
+        }
+      }
+      if (questionIndex < questions.length - 1) {
+        questionIndex += 1;
+        renderQuestion();
+      } else {
+        buildResult();
+      }
+    });
+    document.getElementById("retry-button").addEventListener("click", () => {
+      Object.keys(answers).forEach((key) => delete answers[key]);
+      questionIndex = 0;
+      questions = scenarioData[scenario].questions.filter((question) => analysisMode === "precise" || !question.preciseOnly);
+      renderQuestion();
+      showScreen("quiz");
+    });
+    document.getElementById("home-button").addEventListener("click", () => showScreen("home"));
+    document.getElementById("copy-button").addEventListener("click", async () => {
+      const text = `概率罗盘｜${scenarioData[scenario].label}分析\n${document.getElementById("result-content").innerText}`;
+      const toast = document.getElementById("toast");
+      try {
+        await navigator.clipboard.writeText(text);
+        toast.textContent = "分析摘要已复制，可自行转发给对方。";
+      } catch (error) {
+        toast.textContent = "复制不可用时，可以截图保存这页的分析。";
+      }
+    });
+    document.getElementById("buddy-button").addEventListener("click", () => {
+      const screen = screens.find((item) => item.classList.contains("active"));
+      const messages = screen ? participantMessages[screen.id] : participantMessages.home;
+      buddyMessageIndex = (buddyMessageIndex + 1) % messages.length;
+      buddySay(messages[buddyMessageIndex]);
+    });
+  </script>
+</body>
+</html>
