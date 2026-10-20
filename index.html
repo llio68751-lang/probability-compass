@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f4f6f1">
-  <title>概率罗盘｜把准备变成底气</title>
+  <meta name="theme-color" content="#211318">
+  <title>概率罗盘｜揭开下一张牌</title>
   <style>
     :root {
       color-scheme: light;
       --ink: #18352d;
-      --muted: #71827a;
+      --muted: #5f7067;
       --green: #17634e;
       --mint: #dcefe4;
       --paper: #f4f6f1;
@@ -88,7 +88,7 @@
     .participant-choice { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: white; color: #53615a; font-size: 11px; cursor: pointer; transition: .15s ease; }
     .participant-choice:has(input:checked) { border-color: var(--green); color: var(--green); background: #eaf4ed; }
     .participant-choice input { margin: 0; accent-color: var(--green); }
-    .privacy-note { margin: 10px 1px 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .privacy-note { margin: 10px 1px 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
     .field-wrap { display: grid; gap: 7px; }
     .field-label { font-size: 12px; font-weight: 700; line-height: 1.55; }
     .field-hint { color: var(--muted); font-size: 11px; font-weight: 400; line-height: 1.55; }
@@ -109,7 +109,8 @@
     .feature span:last-child { color: var(--muted); font-size: 10px; line-height: 1.5; }
     .primary, .secondary, .text-button { width: 100%; min-height: 52px; border: 0; border-radius: 16px; cursor: pointer; }
     .primary { color: white; background: linear-gradient(105deg, #17634e, #1d7355); font-weight: 730; box-shadow: 0 8px 20px rgba(21,92,73,.16); }
-    .primary:hover { background: linear-gradient(105deg, #125740, #165f47); }
+    .primary:hover:not(:disabled) { background: linear-gradient(105deg, #125740, #165f47); }
+    .primary:disabled { cursor: not-allowed; opacity: .52; box-shadow: none; }
     .secondary { border: 1px solid var(--line); color: var(--ink); background: rgba(255,255,255,.88); font-weight: 650; }
     .text-button { min-height: 40px; margin-top: 8px; color: var(--muted); background: transparent; font-size: 12px; }
     .footer-note { margin: 15px 5px 0; color: #89938e; font-size: 10px; line-height: 1.6; text-align: center; }
@@ -120,6 +121,7 @@
     .progress-value { width: 25%; height: 100%; border-radius: inherit; background: var(--green); transition: width .2s ease; }
     .step-count { margin-bottom: 12px; color: var(--muted); font-size: 11px; }
     .question-title { margin-bottom: 8px; font-size: 25px; letter-spacing: -.04em; }
+    .question-title { white-space: pre-line; }
     .question-hint { margin-bottom: 23px; color: var(--muted); font-size: 13px; line-height: 1.65; }
     .options { display: grid; gap: 10px; }
     .option {
@@ -137,6 +139,8 @@
     .question-actions .secondary { width: 94px; flex: 0 0 94px; }
     .question-actions .primary { flex: 1; }
     .question-error { min-height: 18px; margin: 9px 2px 0; color: #b34c35; font-size: 11px; }
+    .question-guidance { margin: 10px 2px 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .question-guidance[hidden] { display: none; }
     .result-head { padding: 19px 20px; border-radius: 21px; background: var(--mint); }
     .score-line { display: flex; align-items: end; gap: 8px; margin: 14px 0 7px; }
     .score { font-size: 54px; font-weight: 760; letter-spacing: -.07em; line-height: .95; }
@@ -152,7 +156,7 @@
     .advice-list { display: grid; gap: 13px; }
     .advice { display: flex; gap: 10px; align-items: flex-start; color: #53615a; font-size: 12px; line-height: 1.6; }
     .advice-num { display: grid; width: 21px; height: 21px; flex: 0 0 21px; place-items: center; border-radius: 8px; color: var(--green); background: #e9f3ec; font-size: 10px; font-weight: 750; }
-    .disclaimer { margin: 13px 2px 17px; color: #89938e; font-size: 10px; line-height: 1.65; }
+    .disclaimer { margin: 13px 2px 17px; color: #65736b; font-size: 11px; line-height: 1.65; }
     .fortune-card { position: relative; overflow: hidden; padding: 19px; border-radius: 18px; color: #fff8ed; background: #293b36; }
     .fortune-card::after { position: absolute; right: -15px; bottom: -39px; width: 105px; height: 105px; border: 1px solid rgba(255,255,255,.25); border-radius: 50%; content: ""; box-shadow: 0 0 0 14px rgba(255,255,255,.04); }
     .fortune-card .eyebrow { color: #d8c49f; }
@@ -167,6 +171,9 @@
       body { padding: 22px 0; }
       .app { min-height: calc(100vh - 44px); padding: 28px 32px 38px; border: 1px solid rgba(225,232,222,.9); border-radius: 32px; background: rgba(250,251,247,.84); box-shadow: 0 22px 80px rgba(32,52,43,.085); }
       .topbar { margin-bottom: 35px; }
+    }
+    @media (min-width: 760px) {
+      .app { width: min(100%, 640px); }
     }
     @media (max-width: 420px) {
       .cover-mascot { right: 17px; bottom: 15px; width: 76px; height: 76px; }
@@ -189,85 +196,264 @@
       .hero-card h2 { max-width: 180px; font-size: 23px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+    :root {
+      color-scheme: light;
+      --ink: #21171a;
+      --muted: #726467;
+      --green: #8e2439;
+      --mint: #f0dfd8;
+      --paper: #f4eee7;
+      --white: #fffaf4;
+      --line: #e4d7cd;
+      --orange: #bb7b34;
+      --shadow-soft: 0 16px 42px rgba(39, 19, 27, .1);
+      --wine: #6e172b;
+      --red: #b63245;
+      --velvet: #24171d;
+      --brass: #d3ad70;
+    }
+    body {
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 12% 8%, rgba(157, 41, 58, .25), transparent 29rem),
+        radial-gradient(ellipse at 92% 70%, rgba(179, 132, 72, .12), transparent 32rem),
+        repeating-linear-gradient(135deg, rgba(255,255,255,.012) 0 1px, transparent 1px 5px),
+        #1d1519;
+    }
+    .app { width: min(100%, 760px); padding: 26px clamp(20px, 5vw, 48px) 42px; }
+    .topbar { margin-bottom: 36px; }
+    .brand { color: #fbf2e7; font-size: 15px; letter-spacing: .08em; }
+    .brand-mark { border: 1px solid rgba(223,186,122,.52); border-radius: 10px; color: #24171d; background: linear-gradient(145deg, #f1d39e, #b9834e); box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+    .buddy { max-width: 220px; color: #fff5e9; }
+    .buddy-bubble { border-color: rgba(226,195,159,.2); color: #f4e7dd; background: rgba(54,34,42,.9); box-shadow: 0 7px 18px rgba(0,0,0,.18); }
+    .buddy-face { filter: drop-shadow(0 5px 8px rgba(0,0,0,.32)); }
+    .buddy-mouth { transform-box: fill-box; transform-origin: center; }
+    .buddy.speaking .buddy-mouth { animation: mask-talk .18s ease-in-out infinite alternate; }
+    @keyframes mask-talk { to { transform: scaleY(2.2); } }
+    .buddy:focus-visible { outline-color: var(--brass); }
+    .eyebrow { color: var(--wine); }
+    .home-kicker { border-color: rgba(205,166,110,.35); color: #f0d6ab; background: rgba(74,42,48,.68); }
+    .home-kicker::before { background: #e3b365; box-shadow: 0 0 0 3px rgba(227,179,101,.17); }
+    h1 { color: #fff7ed; max-width: 600px; font-size: clamp(39px, 8vw, 62px); letter-spacing: -.045em; line-height: 1.12; }
+    .intro { max-width: 560px; color: #cbb9b2; font-size: 14px; line-height: 1.9; }
+    .hero-card {
+      min-height: 245px; margin: 27px 0 31px; padding: clamp(23px, 4vw, 34px);
+      border: 1px solid rgba(229,189,126,.36); border-radius: 24px; color: #fff4e7;
+      background:
+        radial-gradient(ellipse at 88% 35%, rgba(180,47,61,.3), transparent 16rem),
+        linear-gradient(120deg, #391d27, #612331 55%, #2c1c23);
+      box-shadow: 0 24px 58px rgba(6,4,5,.3), inset 0 1px rgba(255,255,255,.06);
+    }
+    .hero-card::after { right: -80px; bottom: -165px; border-color: rgba(221,182,125,.2); box-shadow: 0 0 0 22px rgba(255,255,255,.025), 0 0 0 49px rgba(255,255,255,.02), 0 0 0 77px rgba(255,255,255,.016); }
+    .hero-card .eyebrow { color: #e8c999; }
+    .hero-card h2 { max-width: 400px; font-size: clamp(27px, 5vw, 36px); line-height: 1.24; }
+    .hero-card p { max-width: min(380px, calc(100% - 150px)); color: #ead8d0; font-size: 12px; line-height: 1.8; }
+    .sun { right: 82px; top: 45px; border-color: rgba(229,190,129,.5); box-shadow: 0 0 35px rgba(213,166,101,.13); }
+    .sun::after { border-color: rgba(229,190,129,.36); }
+    .sun.fate-wheel { overflow: visible; border: 2px solid #e1bd7b; background: conic-gradient(#a93142 0 30deg, #f2e1c3 30deg 60deg, #292027 60deg 90deg, #e1bd7b 90deg 120deg, #863048 120deg 150deg, #f2e1c3 150deg 180deg, #292027 180deg 210deg, #a93142 210deg 240deg, #f2e1c3 240deg 270deg, #79253d 270deg 300deg, #292027 300deg 330deg, #e1bd7b 330deg); }
+    .sun.fate-wheel::before { position: absolute; top: -9px; left: 50%; width: 0; height: 0; border-right: 7px solid transparent; border-bottom: 13px solid #f0cb84; border-left: 7px solid transparent; content: ""; transform: translateX(-50%); }
+    .sun.fate-wheel::after { inset: 21px; border: 2px solid #f0d5a1; background: #48212d; box-shadow: inset 0 0 0 4px rgba(255,246,227,.13); }
+    .fate-wheel-caption { position: absolute; top: 111px; right: 49px; color: #e2c398; font-size: 8px; font-weight: 700; letter-spacing: .1em; }
+    .cover-mascot { right: 30px; bottom: 16px; width: 112px; height: 112px; }
+    .stage-deck { position: absolute; z-index: 0; right: 163px; bottom: 24px; display: flex; align-items: flex-end; gap: 8px; opacity: .9; transform: rotate(-7deg); }
+    .stage-card { display: grid; width: 40px; height: 57px; place-items: center; border: 1px solid rgba(246,225,199,.78); border-radius: 6px; color: #7c2133; background: #f7eee1; box-shadow: 0 6px 13px rgba(0,0,0,.23); font: 700 21px/1 Georgia, serif; }
+    .stage-card:last-child { margin-left: -22px; transform: translateY(-8px) rotate(16deg); color: #24171d; }
+    .stage-chess { margin-left: 2px; color: #e2c18d; font: 40px/1 Georgia, serif; text-shadow: 0 5px 8px rgba(0,0,0,.35); }
+    .section-label { margin-top: 30px; color: #f3e1d3; font-size: 13px; letter-spacing: .04em; }
+    .suit-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: -2px 0 13px; color: #d1bdb1; font-size: 10px; line-height: 1.5; }
+    .suit-legend strong { margin-right: 3px; color: #e9c17d; font: 700 14px/1 Georgia, serif; }
+    .scenario-option, .mode-option, .feature {
+      border-color: #e2d5ca; background: linear-gradient(150deg, #fffaf4, #f2e8de);
+      box-shadow: 0 7px 18px rgba(12,7,9,.12);
+    }
+    .scenario-option:hover, .option:hover { border-color: #bc795a; }
+    .scenario-option.selected, .mode-option.selected { border-color: #9b3244; background: linear-gradient(145deg, #fff7ee, #f3dfd5); box-shadow: 0 8px 20px rgba(100,30,45,.13), inset 0 0 0 1px rgba(128,37,53,.13); }
+    .scenario-icon { border-color: #ead7c1; background: linear-gradient(145deg, #fbf2e6, #ecdcc9); }
+    .scenario-option strong { color: #2b2022; font-size: 13px; }
+    .scenario-option small { color: #78686a; font-size: 11px; line-height: 1.65; }
+    .scenario-radio { border-color: #ddcfc4; }
+    .mode-option { color: var(--ink); }
+    .mode-option small { color: #746568; }
+    .mode-option::after { border-color: #ddcfc4; }
+    .participant-card { border-color: #e2d5ca; background: #fbf5ed; }
+    .participant-choice { border-color: #e0d1c5; color: #56464a; background: #fffaf4; }
+    .participant-choice:has(input:checked) { border-color: #9b3244; color: #7b2034; background: #f7e8e1; }
+    .privacy-note, .footer-note { color: #b9a9a5; }
+    .participant-card .privacy-note { color: #77696a; }
+    .primary { color: #fff7ee; background: linear-gradient(105deg, #861f36, #b13345 55%, #8b2838); box-shadow: 0 10px 24px rgba(100,24,42,.25); }
+    .primary:hover:not(:disabled) { background: linear-gradient(105deg, #72182e, #a22a3d); }
+    .secondary { border-color: #dfd0c4; color: #352529; background: #fffaf4; }
+    .text-button { color: #d5c5bd; }
+    .progress-line { background: #dfd3c9; }
+    .progress-value { background: linear-gradient(90deg, #91263b, #d1a45f); }
+    .step-count { color: #dac8bd; letter-spacing: .035em; }
+    .question-layout { display: grid; grid-template-columns: 78px minmax(0, 1fr); align-items: start; gap: 19px; margin: 16px 0 24px; }
+    .question-card { position: relative; display: flex; width: 78px; min-height: 108px; flex-direction: column; justify-content: space-between; padding: 8px; border: 1px solid #dac7ae; border-radius: 9px; color: #8c263c; background: linear-gradient(150deg, #fffdf8, #f3e7d5); box-shadow: 0 9px 20px rgba(8,4,5,.25), inset 0 0 0 3px rgba(187,148,98,.12); font-family: Georgia, "Times New Roman", serif; }
+    .question-card::after { position: absolute; inset: 4px; border: 1px solid rgba(155,116,70,.19); border-radius: 6px; content: ""; pointer-events: none; }
+    .question-card.spade, .question-card.club { color: #271a20; }
+    .question-card.spade .question-card-center { color: #81263a; }
+    .question-card.diamond { color: #a62b40; }
+    .question-card.heart { color: #b52c45; }
+    .question-card.club .question-card-center { color: #9a6a39; }
+    .question-card-corner { display: grid; justify-items: center; align-content: start; width: 17px; font-weight: 700; line-height: 1; }
+    .question-card-rank { font-size: 15px; }
+    .question-card-suit { font-size: 13px; }
+    .question-card-center { align-self: center; margin-top: -2px; font-size: 38px; line-height: 1; }
+    .question-card-label { margin-top: -3px; color: #78645e; font: 700 7px/1.2 Inter, ui-sans-serif, sans-serif; letter-spacing: .09em; text-align: center; text-transform: uppercase; }
+    .question-card-corner.bottom { align-self: flex-end; transform: rotate(180deg); }
+    .question-copy { min-width: 0; padding-top: 2px; }
+    .question-title { margin-bottom: 10px; color: #fff7ee; font-size: clamp(24px, 4.2vw, 32px); line-height: 1.42; letter-spacing: -.025em; }
+    .question-hint { margin-bottom: 23px; color: #d4c0ba; font-size: 13px; line-height: 1.85; }
+    .options { gap: 11px; }
+    .option { min-height: 62px; padding: 16px 17px; border-color: #e4d7cd; border-radius: 14px; color: #2a2022; background: linear-gradient(140deg, #fffaf4, #f4ebe2); box-shadow: 0 5px 15px rgba(11,6,8,.12); }
+    .option.selected { border-color: #9d2d42; background: linear-gradient(140deg, #fff8f0, #f4ddd5); box-shadow: inset 0 0 0 1px rgba(137,37,55,.12), 0 6px 16px rgba(70,18,29,.11); }
+    .option-title { font-size: 13px; line-height: 1.65; }
+    .option-subtitle { color: #75666a; line-height: 1.7; }
+    .option-check { border-color: #d8c8bd; }
+    .question-actions { margin-top: 24px; }
+    .question-error { color: #f1b8ae; }
+    .question-guidance { color: #cdbbb4; }
+    .field-input { border-color: #dfcfc3; color: #2c2023; background: #fffaf4; }
+    .field-input:focus { border-color: #a63b4b; box-shadow: 0 0 0 3px rgba(166,59,75,.15); }
+    .field-input::placeholder { color: #a28f89; }
+    .field-wrap > .field-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+    .field-hint, .field-help { color: #817174; }
+    .result-head { border: 1px solid #ead4c4; color: #fff4e8; background: linear-gradient(130deg, #3a2028, #762637); }
+    .result-tag { color: #592236; background: #ead8ba; }
+    .result-subtitle { color: #ead9cf; }
+    .result-card { border-color: #e5d7cb; background: linear-gradient(150deg, #fffaf4, #faf3ea); box-shadow: 0 6px 17px rgba(15,8,10,.11); }
+    .result-card h3 { color: #542433; font-size: 15px; line-height: 1.5; }
+    .result-card a { color: #84263a; text-underline-offset: 3px; }
+    .result-card a:hover { color: #561a2c; }
+    .result-subtitle, .detail-copy { line-height: 1.9; }
+    .result-question { color: #302326; line-height: 1.8; }
+    .factor-top, .advice { color: #655457; }
+    .factor-bar { background: #eadfd5; }
+    .factor-fill { background: linear-gradient(90deg, #99273d, #d3a25e); }
+    .factor-fill.low { background: #b86750; }
+    .advice-num { color: #fff4e8; background: #85263b; }
+    .fortune-card { border: 1px solid rgba(216,175,115,.35); background: linear-gradient(135deg, #271920, #542331); }
+    .fortune-card .eyebrow { color: #e1bf8f; }
+    .fortune-card p { color: #ead9cf; line-height: 1.8; }
+    .fortune-note { color: #c4aaa0 !important; }
+    .toast { color: #80263a; }
+    .question-error[aria-live], .buddy[aria-live] { overflow-wrap: anywhere; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible { outline-color: rgba(221,177,113,.8); }
+    @media (min-width: 600px) {
+      body { padding: 28px 0; }
+      .app { min-height: calc(100vh - 56px); padding: 34px clamp(34px, 6vw, 62px) 46px; border: 1px solid rgba(229,202,170,.18); border-radius: 28px; background: linear-gradient(155deg, #34232a, #291c22 64%, #251b20); box-shadow: 0 28px 90px rgba(0,0,0,.4); }
+    }
+    @media (max-width: 480px) {
+      .brand { flex: 0 0 auto; white-space: nowrap; }
+      .buddy { max-width: 190px; }
+      .stage-deck { right: 119px; bottom: 14px; transform: scale(.82) rotate(-7deg); transform-origin: right bottom; }
+      .cover-mascot { right: 12px; width: 93px; height: 93px; }
+      .hero-card { min-height: 320px; }
+      .hero-card h2 { max-width: min(195px, calc(100% - 120px)); font-size: 25px; }
+      .hero-card p { max-width: min(190px, calc(100% - 120px)); }
+      .fate-wheel-caption { right: 17px; }
+      .question-layout { grid-template-columns: 58px minmax(0,1fr); gap: 13px; margin-top: 13px; }
+      .question-card { width: 58px; min-height: 84px; padding: 6px; }
+      .question-card-center { font-size: 30px; }
+      .question-card-rank { font-size: 13px; }
+      .question-card-suit { font-size: 11px; }
+      .question-card-label { font-size: 6px; }
+      .question-title { font-size: 22px; line-height: 1.43; }
+      .app { padding-top: 21px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .buddy-face, .cover-mascot { animation: none; }
+    }
   </style>
 </head>
 <body>
   <main class="app">
     <header class="topbar">
-      <div class="brand"><span class="brand-mark" aria-hidden="true">✳</span><span>概率罗盘</span></div>
-      <button class="buddy" id="buddy-button" type="button" aria-label="小罗：嗨，我是小罗，一起把问题拆小吧。点击听我说一句">
-        <span class="buddy-bubble" id="buddy-message" aria-live="polite">嗨，我是小罗，一起把问题拆小吧。</span>
-        <svg class="buddy-face" id="buddy-face" viewBox="0 0 64 64" role="img" aria-label="小罗，一只圆圆的绿色小伙伴">
-          <path d="M31 13C23 2 34 1 40 9c8-5 14 1 8 8" fill="#79ba87" stroke="#155c49" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M13 29c0-11 8-18 19-18s19 7 19 18v13c0 10-8 17-19 17S13 52 13 42V29Z" fill="#a7d8a6" stroke="#155c49" stroke-width="2.5"/>
-          <path d="M13 29c-7-2-9 7-3 10 1 1 2 1 4 1m36-11c7-2 9 7 3 10-1 1-2 1-4 1" fill="#a7d8a6" stroke="#155c49" stroke-width="2.5" stroke-linecap="round"/>
-          <ellipse cx="25" cy="34" rx="2.2" ry="3" fill="#173d32" class="buddy-eye"/>
-          <ellipse cx="40" cy="34" rx="2.2" ry="3" fill="#173d32" class="buddy-eye"/>
-          <ellipse cx="20" cy="40" rx="3.2" ry="1.8" fill="#ec9182" opacity=".72"/>
-          <ellipse cx="45" cy="40" rx="3.2" ry="1.8" fill="#ec9182" opacity=".72"/>
-          <path class="buddy-mouth" d="M28 42c2 3 6 3 9 0" fill="none" stroke="#155c49" stroke-width="2" stroke-linecap="round"/>
-          <path d="m52 16 1.6 3.7 4 1.5-4 1.6-1.6 3.8-1.5-3.8-4-1.6 4-1.5 1.5-3.7Z" fill="#efb85e"/>
+      <div class="brand"><span class="brand-mark" aria-hidden="true">♠</span><span>概率罗盘</span></div>
+      <button class="buddy" id="buddy-button" type="button" aria-label="小丑面具说：揭开下一张牌吧。点击听我说一句">
+        <span class="buddy-bubble" id="buddy-message" aria-live="polite">揭开下一张牌吧。点我听一句提示。</span>
+        <svg class="buddy-face" id="buddy-face" viewBox="0 0 64 64" role="img" aria-label="会说话的小丑面具，红黑与象牙白的戏剧面具">
+          <path d="M11 17C2 10 6 4 18 9l5 9m30-1c9-7 5-13-7-8l-5 9" fill="#a83245" stroke="#251a20" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="m10 10 4 1 2 4 2-4 4-1-4-2-2-4-2 4-4 2Zm32-1 4 1 2 4 2-4 4-1-4-2-2-4-2 4-4 2Z" fill="#e9c47e" stroke="#6e172b" stroke-width="1.2"/>
+          <path d="M31 10 21 17l-8-1 3 10-4 6 6 9c2 12 9 17 14 17s12-5 14-17l6-9-4-6 3-10-8 1-10-7Z" fill="#f4e9d8" stroke="#24171d" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="m31 11-9 7-8-2 3 10-4 6 6 9c2 11 8 16 12 17V11Z" fill="#a62e43"/>
+          <path d="M13 32 31 30l1 2-17 4m19-6 18 2-1 4-17-2" fill="#21171b" stroke="#21171b" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M23 45c4-2 6-2 9 0 3-2 6-2 9 0-2 7-6 10-9 10s-7-3-9-10Z" fill="#fff4e7" stroke="#6e172b" stroke-width="1.5"/>
+          <path class="buddy-mouth" d="M27 48c3-2 7-2 10 0" fill="none" stroke="#8a2538" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="8" cy="28" r="3.4" fill="#dfba78" stroke="#6e172b" stroke-width="1.5"/>
+          <circle cx="56" cy="28" r="3.4" fill="#dfba78" stroke="#6e172b" stroke-width="1.5"/>
         </svg>
       </button>
     </header>
 
     <section class="screen active" id="home" aria-labelledby="home-title">
       <div class="home-kicker">概率 × 情境 × 下一步行动</div>
-      <h1 id="home-title">好奇的事，<br>一起理清。</h1>
-      <p class="intro">学习、游戏抽卡，或一件正在发生的事。选一个场景，补充信息，小罗陪你拆解概率、证据和未知因素。</p>
+      <h1 id="home-title" tabindex="-1">下一张牌，<br>你来揭开。</h1>
+      <p class="intro">纸牌已经洗好，下一步由你决定。选一场概率推演，让小丑面具陪你观察线索、权衡策略，揭开未知的一角。</p>
       <div class="hero-card">
-        <div class="sun" aria-hidden="true"></div>
-        <div class="eyebrow">你的问题值得认真看</div>
-        <h2>不靠猜，<br>看看依据在哪里。</h2>
-        <p>能精确计算的就展示公式；资料不足时，也会坦白告诉你还缺什么。</p>
-        <svg class="cover-mascot" viewBox="0 0 100 100" role="img" aria-label="小罗陪你一起分析">
-          <circle cx="50" cy="53" r="44" fill="rgba(235,255,238,.13)"/>
-          <path d="M48 27C37 13 51 7 59 20c10-7 20 2 10 12" fill="#f1c875" stroke="#155c49" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M19 50c0-17 13-28 31-28s31 11 31 28v18c0 16-13 27-31 27S19 84 19 68V50Z" fill="#b4e2aa" stroke="#155c49" stroke-width="3"/>
-          <path d="M19 48c-10-3-14 10-5 15 2 1 4 2 7 1m60-16c10-3 14 10 5 15-2 1-4 2-7 1" fill="#b4e2aa" stroke="#155c49" stroke-width="3" stroke-linecap="round"/>
-          <ellipse cx="39" cy="57" rx="3" ry="4" fill="#193e32"/>
-          <ellipse cx="61" cy="57" rx="3" ry="4" fill="#193e32"/>
-          <ellipse cx="31" cy="66" rx="4" ry="2.5" fill="#ec9182" opacity=".8"/>
-          <ellipse cx="69" cy="66" rx="4" ry="2.5" fill="#ec9182" opacity=".8"/>
-          <path d="M44 70c3 4 9 4 12 0" fill="none" stroke="#155c49" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="m79 27 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" fill="#f4d990"/>
+        <div class="sun fate-wheel" aria-hidden="true"></div>
+        <div class="fate-wheel-caption" aria-hidden="true">命运转盘 · 只作装饰</div>
+        <div class="eyebrow">欢迎来到概率牌桌</div>
+        <h2>下注之前，<br>先看清手里的牌。</h2>
+        <p>这里没有命运预言：只有清楚的规则、可核对的概率，以及下一步可以尝试的策略。</p>
+        <div class="stage-deck" aria-hidden="true"><span class="stage-card">♥</span><span class="stage-card">♠</span><span class="stage-chess">♞</span></div>
+        <svg class="cover-mascot" viewBox="0 0 64 64" role="img" aria-label="小丑面具陪你揭开下一张牌">
+          <path d="M31 10 21 17l-8-1 3 10-4 6 6 9c2 12 9 17 14 17s12-5 14-17l6-9-4-6 3-10-8 1-10-7Z" fill="#f4e9d8" stroke="#24171d" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="m31 11-9 7-8-2 3 10-4 6 6 9c2 11 8 16 12 17V11Z" fill="#a62e43"/>
+          <path d="M13 32 31 30l1 2-17 4m19-6 18 2-1 4-17-2" fill="#21171b"/>
+          <path d="M24 46c3-2 5-1 8 0 3-1 5-2 8 0-2 6-5 9-8 9s-6-3-8-9Z" fill="#fff4e7" stroke="#6e172b" stroke-width="1.5"/>
+          <path d="m11 17-5-6 8 1m39 5 5-6-8 1" fill="#a83245" stroke="#24171d" stroke-width="2.2" stroke-linejoin="round"/>
+          <circle cx="8" cy="28" r="3.4" fill="#dfba78" stroke="#6e172b" stroke-width="1.5"/><circle cx="56" cy="28" r="3.4" fill="#dfba78" stroke="#6e172b" stroke-width="1.5"/>
         </svg>
       </div>
-      <div class="section-label">你想一起分析什么？</div>
+      <div class="section-label">选择你的牌桌</div>
+      <div class="suit-legend" aria-label="扑克牌花色含义"><span><strong>♥</strong>关系</span><span><strong>♦</strong>概率与选择</span><span><strong>♣</strong>学习与行动</span><span><strong>♠</strong>证据与策略</span></div>
       <div class="scenario-list" role="radiogroup" aria-label="选择分析场景">
         <button class="scenario-option selected" type="button" data-scenario="study" role="radio" aria-checked="true">
-          <span class="scenario-icon" aria-hidden="true">📚</span><span><strong>学习与考试</strong><small>准备状态、复习节奏与下一步建议</small></span><span class="scenario-radio" aria-hidden="true">●</span>
+          <span class="scenario-icon" aria-hidden="true">♣</span><span><strong>学习与考试</strong><small>准备状态、复习节奏与下一步建议</small></span><span class="scenario-radio" aria-hidden="true">●</span>
         </button>
         <button class="scenario-option" type="button" data-scenario="gacha" role="radio" aria-checked="false">
-          <span class="scenario-icon" aria-hidden="true">🎴</span><span><strong>游戏抽卡</strong><small>根据卡池概率、抽数和目标保底计算</small></span><span class="scenario-radio" aria-hidden="true">○</span>
+          <span class="scenario-icon" aria-hidden="true">♦</span><span><strong>游戏抽卡</strong><small>根据卡池概率、抽数和目标保底计算</small></span><span class="scenario-radio" aria-hidden="true">○</span>
         </button>
         <button class="scenario-option" type="button" data-scenario="event" role="radio" aria-checked="false">
-          <span class="scenario-icon" aria-hidden="true">🔎</span><span><strong>一件事发生的可能性</strong><small>梳理时间范围、证据和关键未知</small></span><span class="scenario-radio" aria-hidden="true">○</span>
+          <span class="scenario-icon" aria-hidden="true">♠</span><span><strong>一件事发生的可能性</strong><small>梳理时间范围、证据和关键未知</small></span><span class="scenario-radio" aria-hidden="true">○</span>
         </button>
         <button class="scenario-option" type="button" data-scenario="custom" role="radio" aria-checked="false">
-          <span class="scenario-icon" aria-hidden="true">💭</span><span><strong>自定义问题</strong><small>把你真正好奇的事情告诉小罗</small></span><span class="scenario-radio" aria-hidden="true">○</span>
+          <span class="scenario-icon" aria-hidden="true">♦</span><span><strong>自定义问题</strong><small>把你真正好奇的事情告诉面具</small></span><span class="scenario-radio" aria-hidden="true">○</span>
+        </button>
+        <button class="scenario-option" type="button" data-scenario="love" role="radio" aria-checked="false">
+          <span class="scenario-icon" aria-hidden="true">♥</span><span><strong>恋爱与关系</strong><small>梳理沟通、边界和彼此期待</small></span><span class="scenario-radio" aria-hidden="true">○</span>
+        </button>
+        <button class="scenario-option" type="button" data-scenario="social" role="radio" aria-checked="false">
+          <span class="scenario-icon" aria-hidden="true">♣</span><span><strong>人际与社交</strong><small>理解互动模式，练习表达与倾听</small></span><span class="scenario-radio" aria-hidden="true">○</span>
+        </button>
+        <button class="scenario-option" type="button" data-scenario="career" role="radio" aria-checked="false">
+          <span class="scenario-icon" aria-hidden="true">♦</span><span><strong>选择与规划</strong><small>比较选项、风险和下一步</small></span><span class="scenario-radio" aria-hidden="true">○</span>
+        </button>
+        <button class="scenario-option" type="button" data-scenario="logic" role="radio" aria-checked="false">
+          <span class="scenario-icon" aria-hidden="true">♞</span><span><strong>博弈策略</strong><small>经典情景推演，选择策略并计算模型胜率</small></span><span class="scenario-radio" aria-hidden="true">○</span>
         </button>
       </div>
-      <div class="section-label">选择分析深度</div>
+      <div class="section-label">决定这场推演的深度</div>
       <div class="mode-list" role="radiogroup" aria-label="选择分析模式">
         <button class="mode-option selected" type="button" data-mode="simple" role="radio" aria-checked="true">
-          <strong>☀ 简便模式</strong><small>少量关键问题，快速得到清晰的参考结果。</small>
+          <strong>☀ 简便模式</strong><small>最多 20 题；可随时先看当前分析，也可继续追问。</small>
         </button>
         <button class="mode-option" type="button" data-mode="precise" role="radio" aria-checked="false">
-          <strong>◎ 精确模式</strong><small>补充更多条件、规则和假设，做更细的条件分析。</small>
+          <strong>◎ 精确模式</strong><small>最多 50 题；补充条件、规则和假设，随时查看阶段结果。</small>
         </button>
       </div>
-      <p class="privacy-note" style="margin-top:-5px">精确模式代表输入与分析更详细；现实事件若缺少可靠数据，仍不会虚构精确概率。</p>
+      <p class="privacy-note" style="margin-top:-5px">简便模式最多 20 题，精确模式最多 50 题；题目会根据回答调整，可随时提前查看阶段结果。恋爱、人际和选择分析只帮助梳理信息，不判断他人想法或预测结果。</p>
       <div class="participant-card">
         <span class="participant-label">这次是替谁来问？</span>
         <div class="participant-options">
           <label class="participant-choice"><input type="radio" name="participant" value="self" checked> 为我自己</label>
           <label class="participant-choice"><input type="radio" name="participant" value="other"> 帮别人代问</label>
         </div>
-        <p class="privacy-note" id="privacy-note">仅在本设备临时分析，不会保存回答。代问时请先征得对方同意；不必填写姓名或其他身份信息。</p>
+        <p class="privacy-note" id="privacy-note">分析在浏览器本地进行，回答不会提交给分析服务器或由本页面保存。网站托管服务可能按其政策记录基本访问日志。代问请先征得同意，避免填写身份信息。</p>
       </div>
-      <button class="primary" id="start-button">开始简便分析 <span aria-hidden="true">→</span></button>
-      <p class="footer-note">不同场景会询问不同信息 · 不提供无依据的“运气百分比”</p>
+      <button class="primary" id="start-button">开始推演 <span aria-hidden="true">→</span></button>
+      <p class="footer-note">心理反馈是情境自我观察，不是诊断或性格定论；博弈胜率受模型假设限制，关系场景不推测他人想法。</p>
     </section>
 
     <section class="screen" id="quiz" aria-labelledby="question-title">
@@ -275,23 +461,38 @@
         <div class="progress-value" id="progress-value"></div>
       </div>
       <div class="step-count" id="step-count"></div>
-      <h2 class="question-title" id="question-title"></h2>
-      <p class="question-hint" id="question-hint"></p>
-      <div class="options" id="options" role="group"></div>
+      <div class="question-layout">
+        <div class="question-card spade" id="question-card" aria-hidden="true">
+          <span class="question-card-corner"><span class="question-card-rank" id="question-card-rank">A</span><span class="question-card-suit" id="question-card-suit">♠</span></span>
+          <span class="question-card-center" id="question-card-center">♠</span>
+          <span class="question-card-label" id="question-card-label">Strategy</span>
+          <span class="question-card-corner bottom"><span class="question-card-rank">A</span><span class="question-card-suit" id="question-card-suit-bottom">♠</span></span>
+        </div>
+        <div class="question-copy">
+          <h2 class="question-title" id="question-title" tabindex="-1"></h2>
+          <p class="question-hint" id="question-hint"></p>
+        </div>
+      </div>
+      <div class="options" id="options" role="group" aria-describedby="question-guidance"></div>
+      <p class="question-guidance" id="question-guidance">请选择一项后继续。</p>
       <p class="question-error" id="question-error" aria-live="polite"></p>
       <div class="question-actions">
         <button class="secondary" id="back-button">返回</button>
-        <button class="primary" id="next-button">继续 <span aria-hidden="true">→</span></button>
+        <button class="primary" id="next-button" aria-describedby="question-guidance" disabled>继续 <span aria-hidden="true">→</span></button>
       </div>
-      <p class="footer-note">回答仅用于本次情境分析，不会被保存。</p>
+      <button class="secondary" id="finish-button" style="margin-top:10px">先看当前分析</button>
+      <p class="privacy-note">未回答的问题不会被当作负面答案；缺少必要数据时会说明无法量化。</p>
+      <p class="footer-note">回答仅在当前页面临时用于分析，不会由本页面保存；请勿输入敏感信息。</p>
     </section>
 
     <section class="screen" id="result" aria-labelledby="result-title">
       <div class="eyebrow" id="result-eyebrow">YOUR ANALYSIS</div>
-      <h2 id="result-title" style="margin-top:10px">情境分析结果</h2>
+      <h2 id="result-title" style="margin-top:10px" tabindex="-1">情境分析结果</h2>
       <div id="result-content"></div>
       <div class="result-actions">
+        <button class="secondary" id="follow-up-button">继续追问或修改回答</button>
         <button class="primary" id="copy-button">复制分析摘要</button>
+        <p class="privacy-note">复制仅包含结论摘要，不包含你填写的问题或背景。</p>
         <button class="secondary" id="retry-button">重新推演</button>
         <button class="text-button" id="home-button">回到首页</button>
         <p class="toast" id="toast" aria-live="polite"></p>
@@ -331,12 +532,278 @@
       { key: "progress", title: "你现在已有多少抽保底进度？", hint: "填本轮已经抽过、尚未触发该保底的抽数。若保底填 0，这里也填 0。", type: "number", preciseOnly: true, min: 0, max: 10000, step: 1, placeholder: "例如 35" },
       { key: "targetGuaranteed", title: "这个保底会直接保证你要的目标吗？", hint: "有些卡池只保证出稀有度，不保证指定目标。", type: "radio", preciseOnly: true, options: [{ title: "会，保底直接给目标", value: "yes" }, { title: "不会，只保证稀有度或其他结果", value: "no" }, { title: "不确定", value: "unknown" }] }
     ];
+    const loveQuestions = [
+      { key: "loveOutcome", title: "你希望这段关系朝哪个可观察的结果发展？", hint: "写下希望看到的一件具体事；系统不能仅凭问卷算出对方喜欢你的概率。", type: "textarea", placeholder: "例如：找个合适时机，坦诚聊聊彼此的期待。", maxLength: 180 },
+      { key: "relationshipStage", title: "你们目前更像处于哪种关系阶段？", type: "radio", options: [{ title: "刚认识或刚开始接触" }, { title: "正在相互了解" }, { title: "已经确定关系" }, { title: "关系状态不太明确" }, { title: "我在整理自己的感受" }] },
+      { key: "relationshipFocus", title: "你此刻最想理清什么？", type: "radio", options: [{ title: "如何表达好感或开启对话" }, { title: "对方的行为让我有些困惑" }, { title: "沟通、边界或相处方式" }, { title: "是否要继续投入这段关系" }, { title: "我更想先了解自己的需要" }] },
+      { key: "relationshipEvidence", title: "你判断关系状况时主要看什么？", hint: "关注可观察到的沟通和行为，不把猜测当作对方的真实想法。", type: "radio", options: [{ title: "多次稳定、彼此尊重的行动" }, { title: "一些互动，但还需要时间观察" }, { title: "主要是零散信号或我的推测" }, { title: "目前信息很少" }] },
+      { key: "relationshipBoundary", title: "在相处中，你的感受与边界能被认真对待吗？", type: "radio", options: [{ title: "大多能自在表达，也会互相尊重" }, { title: "有时可以，有时不太确定" }, { title: "我经常压下自己的需要" }, { title: "我感到不安全或受到强迫" }] },
+      { key: "relationshipNextStep", title: "你希望接下来发生什么？", type: "radio", options: [{ title: "进行一次坦诚、低压力的沟通" }, { title: "观察一段时间，并关注实际行动" }, { title: "先弄清楚自己的期待和界限" }, { title: "暂时拉开距离，照顾好自己" }, { title: "我还不确定" }] }
+    ];
+    const socialQuestions = [
+      { key: "socialOutcome", title: "你希望下一次互动带来什么具体变化？", hint: "明确一点可观察的结果，才方便讨论有哪些行动可能增加实现机会。", type: "textarea", placeholder: "例如：把一个误会说清楚，或更自在地表达拒绝。", maxLength: 180 },
+      { key: "socialFocus", title: "最近你最想改善哪类人际互动？", type: "radio", options: [{ title: "认识新朋友或加入群体" }, { title: "和熟人沟通误会" }, { title: "表达不同意见或拒绝" }, { title: "维持联系但不感到疲惫" }, { title: "判断一段关系是否健康" }] },
+      { key: "socialContext", title: "这种情况通常在什么情境出现？", type: "radio", options: [{ title: "面对面聊天" }, { title: "文字或社交媒体沟通" }, { title: "小组、课堂或工作场合" }, { title: "亲密或重要关系中" }, { title: "情境不固定" }] },
+      { key: "socialApproach", title: "遇到不舒服或不确定时，你通常会？", type: "radio", options: [{ title: "先听对方说完，再确认理解" }, { title: "直接表达自己的感受和需要" }, { title: "先沉默，之后再想怎么说" }, { title: "尽量顺着对方，避免冲突" }, { title: "每次情况不同" }] },
+      { key: "socialSupport", title: "你是否有可以安心讨论这件事的人？", type: "radio", options: [{ title: "有，而且我愿意向对方求助" }, { title: "有，但暂时不想谈" }, { title: "不太确定谁适合倾诉" }, { title: "目前没有这样的支持对象" }] }
+    ];
+    const careerQuestions = [
+      { key: "careerOutcome", title: "你希望这个选择帮你实现什么具体结果？", hint: "尽量说清楚成功长什么样；结果明确后，才能判断什么信息或行动会增加实现机会。", type: "textarea", placeholder: "例如：在三个月内确认这条学习方向是否适合我。", maxLength: 180 },
+      { key: "decision", title: "你现在主要面对哪类选择？", type: "radio", options: [{ title: "学业或职业方向" }, { title: "工作、实习或项目机会" }, { title: "要不要开始、继续或退出一件事" }, { title: "多个选项之间难以取舍" }, { title: "还在定义问题" }] },
+      { key: "options", title: "目前有几个实际可选方案？", type: "radio", options: [{ title: "已经有一个明确方案" }, { title: "有两个主要方案" }, { title: "有三个或更多方案" }, { title: "还没有找到可行选项" }] },
+      { key: "priority", title: "做决定时，哪项最重要？", type: "radio", options: [{ title: "长期成长与学习" }, { title: "稳定、安全或可预期" }, { title: "兴趣、意义与价值观" }, { title: "收入、时间或现实成本" }, { title: "对他人的影响" }] },
+      { key: "decisionEvidence", title: "你对各方案了解到了什么程度？", type: "radio", options: [{ title: "有实际体验或可靠的一手信息" }, { title: "有一些资料，但还缺关键细节" }, { title: "主要依赖他人意见或想象" }, { title: "信息很少，正在收集" }] },
+      { key: "decisionControl", title: "你能否先做一个低成本的小尝试？", type: "radio", options: [{ title: "可以，且容易撤回" }, { title: "可以，但需要投入一些时间" }, { title: "暂时不行，决定成本较高" }, { title: "还不清楚有哪些尝试方式" }] }
+    ];
     const scenarioData = {
       study: { label: "学习与考试", questions: studyQuestions },
       gacha: { label: "游戏抽卡", questions: gachaQuestions },
       event: { label: "事件概率", questions: eventQuestions },
-      custom: { label: "自定义问题", questions: customQuestions }
+      custom: { label: "自定义问题", questions: customQuestions },
+      love: { label: "恋爱与关系", questions: loveQuestions },
+      social: { label: "人际与社交", questions: socialQuestions },
+      career: { label: "选择与规划", questions: careerQuestions },
+      logic: { label: "博弈策略", questions: [] }
     };
+    const reflectionProfiles = {
+      study: { focus: "学习目标", aspects: ["目标是否可衡量", "剩余准备时间", "知识掌握证据", "练习与反馈质量", "复习节奏", "休息与精力", "学习资源", "计划调整", "考试压力", "下一步行动"] },
+      gacha: { focus: "抽取目标", aspects: ["目标与优先级", "官方概率是否核实", "保底规则是否看懂", "预算上限", "已有资源", "未抽中的承受度", "替代目标", "抽取时机", "冲动消费风险", "暂停与复核"] },
+      event: { focus: "目标事件", aspects: ["事件是否定义清楚", "关注时间范围", "已有证据", "基准数据是否匹配", "类似机会次数", "机会是否相互独立", "你能影响的条件", "相反证据", "备选方案", "下一步行动"] },
+      custom: { focus: "目标结果", aspects: ["成功标准", "当前背景", "已有证据", "信息缺口", "时间范围", "影响结果的条件", "可控行动", "替代解释", "风险与代价", "下一步行动"] },
+      love: { focus: "关系目标", aspects: ["你期待的具体结果", "双方期待是否清楚", "沟通是否坦诚", "言行是否持续一致", "尊重与边界", "信任如何建立", "冲突如何修复", "投入是否互相", "安全与自在", "你希望尝试的下一步"] },
+      social: { focus: "互动目标", aspects: ["你希望的具体变化", "双方是否听懂彼此", "表达需要的难易", "拒绝与边界", "互动是否互相", "误会如何澄清", "你感到自在的程度", "可寻求的支持", "关系中的安全感", "你愿意尝试的下一步"] },
+      career: { focus: "选择目标", aspects: ["你希望达成的结果", "选项是否明确", "信息是否可靠", "时间与金钱成本", "最坏情况的承受度", "长期影响", "可逆性与试错空间", "对他人的影响", "暂缺的关键信息", "可执行的下一步"] }
+    };
+    const reflectionLenses = [
+      { title: "为了提高「{aspect}」实现的机会，你目前进行到哪一步？", options: ["还没有开始", "刚开始尝试", "已经做过几次", "有稳定做法并会复盘", "已有持续进展"] },
+      { title: "判断「{aspect}」能否帮助实现目标，你有哪些依据？", options: ["没有可核对依据", "主要是希望或猜测", "有少量相似线索", "有多项实际经历", "有持续且适用的数据"] },
+      { title: "关于「{aspect}」，你能采取多少行动来改善结果机会？", options: ["几乎无法影响", "只能影响一点", "可以影响一部分", "可以主动采取多项行动", "可以直接推进关键条件"] },
+      { title: "即使「{aspect}」还不确定，我也能把下一步行动安排到具体时间，并根据结果调整。", options: ["完全不符合", "比较不符合", "说不清 / 有时符合", "比较符合", "非常符合"] },
+      { title: "面对「{aspect}」，我能区分已知事实和自己的推测，并指出还缺少什么依据。", options: ["完全做不到", "比较难做到", "有时能做到", "大多能做到", "能清楚区分并说明依据"] }
+    ];
+    const gameModels = {
+      monty: {
+        name: "三门换门",
+        source: "Monty Hall 问题；Steve Selvin, “A Problem in Probability,” The American Statistician, 29(1), 67–71 (1975)",
+        sourceUrl: "https://doi.org/10.1080/00031305.1975.10479121"
+      },
+      matching: {
+        name: "猜正反面",
+        source: "Matching Pennies（匹配硬币）零和博弈；参见 Nash, Equilibrium Points in n-Person Games (1950)",
+        sourceUrl: "https://doi.org/10.1073/pnas.36.1.48"
+      },
+      rps: {
+        name: "猜拳读策略",
+        source: "Rock–Paper–Scissors 混合策略；Nash, Equilibrium Points in n-Person Games (1950)",
+        sourceUrl: "https://doi.org/10.1073/pnas.36.1.48"
+      },
+      prison: {
+        name: "囚徒困境",
+        source: "Prisoner's Dilemma；经典收益结构与后续非合作博弈分析，Nash (1950, 1951)",
+        sourceUrl: "https://www.nobelprize.org/prizes/economic-sciences/1994/nash/facts/"
+      },
+      stag: {
+        name: "猎鹿协调",
+        source: "Stag Hunt（猎鹿博弈）；常用于说明协调、信任与风险权衡，参见 Luce & Raiffa, Games and Decisions (1957)，及 Vajda 对该书的同期书评 (1958)",
+        sourceUrl: "https://doi.org/10.2307/2342906"
+      }
+    };
+
+    function makeGameQuestion(family, variant) {
+      const difficulty = Math.min(5, Math.floor(variant / 2) + 1);
+      const base = {
+        key: `game_${family}_${variant + 1}`,
+        gameQuestion: true,
+        gameType: family,
+        difficulty,
+        type: "radio"
+      };
+      if (family === "monty") {
+        const doorCount = 3 + variant;
+        const stayChance = 1 / doorCount;
+        const switchChance = (doorCount - 1) / doorCount;
+        return {
+          ...base,
+          title: `蒙提霍尔换门问题 · ${doorCount} 扇门\n${doorCount} 扇门后只有一扇有奖品。你先选一扇；主持人知道奖品在哪，并总会打开其余空门，只留一扇未开的门。你要换吗？`,
+          hint: `主持人按固定规则打开 ${doorCount - 2} 扇空门；不论简便或精确模式，换门与坚持的机会都按门数计算。`,
+          options: [{ title: "换到另一扇未开的门", value: "switch" }, { title: "坚持最初选的门", value: "stay" }],
+          winProbabilities: { switch: switchChance, stay: stayChance },
+          expectedPayoffs: { switch: switchChance, stay: stayChance },
+          recommendation: "switch",
+          method: `坚持原门的获胜概率为 1/${doorCount}（${formatPercent(stayChance)}）；换到唯一另一扇未开门的获胜概率为 ${doorCount - 1}/${doorCount}（${formatPercent(switchChance)}）。换门把最初另外 ${doorCount - 1} 扇门合计的概率留在另一扇未开门上。`,
+          assumptions: "主持人知道奖品位置、总会打开一扇空门、总会提供换门机会。若主持规则不同，概率需要重算。"
+        };
+      }
+      if (family === "matching") {
+        const headRate = [0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9, 0.25, 0.75][variant];
+        return {
+          ...base,
+          title: `猜正反面 · 第 ${variant + 1} 轮\n你与对手同时出正/反。你猜中对手的结果就赢；根据近期观察，你估计对手出正面的频率约为 ${headRate * 100}%。`,
+          hint: "同时选择意味着对手看不到你的本轮选择；频率估计仅作为本题模型输入。",
+          options: [{ title: "出正面", value: "heads" }, { title: "出反面", value: "tails" }, { title: "随机混合正反", value: "mix" }],
+          winProbabilities: { heads: headRate, tails: 1 - headRate, mix: 0.5 },
+          expectedPayoffs: { heads: headRate, tails: 1 - headRate, mix: 0.5 },
+          recommendation: headRate > 0.5 ? "heads" : headRate < 0.5 ? "tails" : "mix",
+          method: `按对手出正面的估计频率 ${headRate * 100}%：出正面的胜率为 ${headRate * 100}%，出反面为 ${(1 - headRate) * 100}%；真正随机混合时约为 50%。`,
+          assumptions: "每轮对手行为频率近似稳定、双方同时行动；若对手会观察并针对你调整，应更新频率估计或采用随机混合。"
+        };
+      }
+      if (family === "rps") {
+        const distributions = [
+          [0.6, 0.25, 0.15], [0.2, 0.55, 0.25], [0.25, 0.2, 0.55], [0.45, 0.15, 0.4], [0.3, 0.5, 0.2],
+          [0.15, 0.45, 0.4], [0.4, 0.35, 0.25], [0.25, 0.45, 0.3], [0.35, 0.25, 0.4], [1 / 3, 1 / 3, 1 / 3]
+        ];
+        const [rock, paper, scissors] = distributions[variant];
+        const winProbabilities = { rock: scissors, paper: rock, scissors: paper };
+        const recommendation = Object.keys(winProbabilities).reduce((best, action) =>
+          winProbabilities[action] > winProbabilities[best] ? action : best
+        );
+        return {
+          ...base,
+          title: `猜拳读策略 · 第 ${variant + 1} 轮\n你观察到对手最近出拳大致是：石头 ${Math.round(rock * 100)}%、布 ${Math.round(paper * 100)}%、剪刀 ${Math.round(scissors * 100)}%。你出什么？`,
+          hint: "胜利指严格克制对手；平局不计胜。面对会适应的对手，避免长期固定出拳。",
+          options: [{ title: "石头", value: "rock" }, { title: "布", value: "paper" }, { title: "剪刀", value: "scissors" }],
+          winProbabilities,
+          expectedPayoffs: winProbabilities,
+          recommendation,
+          method: `按观察到的出拳分布，石头胜率 ${Math.round(scissors * 100)}%、布胜率 ${Math.round(rock * 100)}%、剪刀胜率 ${Math.round(paper * 100)}%。选择最常被克制的对手动作的克制手势，可提高当前模型下的胜率。`,
+          assumptions: "对手近期频率能代表下一轮且对手不会立即改变策略。若对手真正均匀随机，任何单一手势的胜率都是 1/3。"
+        };
+      }
+      if (family === "prison") {
+        const cooperateRate = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.35][variant];
+        const expectedPayoffs = {
+          cooperate: 3 * cooperateRate,
+          defect: 1 + 4 * cooperateRate
+        };
+        return {
+          ...base,
+          title: `囚徒困境 · 第 ${variant + 1} 轮\n你和同伴同时选择合作或背叛。经典单轮收益：双方合作各得 3；你合作而对方背叛得 0；你背叛而对方合作得 5；双方背叛各得 1。你估计对方合作机会为 ${cooperateRate * 100}%。`,
+          hint: "本题把“赢”定义为本轮个人收益严格高于对手；双方收益相同算平局。若是重复关系，声誉和未来回合会改变策略。",
+          options: [{ title: "合作", value: "cooperate" }, { title: "背叛", value: "defect" }],
+          winProbabilities: { cooperate: 0, defect: cooperateRate },
+          expectedPayoffs,
+          recommendation: "defect",
+          method: `若对方合作，你背叛得 5、对方得 0；若对方背叛，双方都得 1。因此背叛在单轮收益上占优。严格赢过对手的概率：合作 0%，背叛约 ${cooperateRate * 100}%；预期收益分别约 ${expectedPayoffs.cooperate.toFixed(2)} 与 ${expectedPayoffs.defect.toFixed(2)}。`,
+          assumptions: "使用单轮、同时选择、给定收益表和对手合作频率。长期重复博弈、沟通、惩罚机制或收益设定不同，会改变合理策略；这里不把背叛说成所有现实关系中的建议。"
+        };
+      }
+      const stagRate = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.65][variant];
+      const expectedPayoffs = { stag: 4 * stagRate, hare: 2 + stagRate };
+      return {
+        ...base,
+        title: `猎鹿协调 · 第 ${variant + 1} 轮\n你和同伴同时选择：合作追猎大鹿，若双方都选则各得 4，否则你得 0；或独自抓野兔，无论对方选什么你都得 2。你估计同伴选择大鹿的机会为 ${stagRate * 100}%。`,
+        hint: "本题把“赢”定义为个人收益严格高于对方；同时比较稳妥的小收益与协调成功的大收益。",
+        options: [{ title: "合作追猎大鹿", value: "stag" }, { title: "独自抓野兔", value: "hare" }],
+        winProbabilities: { stag: 0, hare: stagRate },
+        expectedPayoffs,
+        recommendation: "hare",
+        method: `若只追求本轮严格赢过对手的机会，独自抓兔的模型胜率为 ${stagRate * 100}%，追鹿为 0%（追鹿时最多与合作同伴打平）。但若比较平均收益，追鹿期望 ${expectedPayoffs.stag.toFixed(2)}，抓兔期望 ${expectedPayoffs.hare.toFixed(2)}；当相信对方合作机会高于约 66.7% 时，追鹿的期望收益更高。`,
+        assumptions: "简化的两人同时行动收益模型；同伴合作频率是玩家估计，不是已验证事实。你要最大化个人期望收益还是单轮胜率，目标不同，策略也会不同。"
+      };
+    }
+
+    function makeGameQuestions(count) {
+      const families = ["monty", "matching", "rps", "prison", "stag"];
+      return Array.from({ length: count }, (_, index) => {
+        const family = families[index % families.length];
+        const variant = Math.floor(index / families.length) % 10;
+        return makeGameQuestion(family, variant);
+      });
+    }
+
+    function buildQuestionPool(scenarioKey, mode) {
+      const limit = questionLimits[mode];
+      if (scenarioKey === "logic") return makeGameQuestions(limit);
+      const base = scenarioData[scenarioKey].questions
+        .filter((question) => mode === "precise" || !question.preciseOnly)
+        .slice(0, limit);
+      const profile = reflectionProfiles[scenarioKey];
+      const reflectionCount = limit - base.length;
+      const reflections = Array.from({ length: reflectionCount }, (_, index) => {
+        const aspect = profile.aspects[Math.floor(index / reflectionLenses.length) % profile.aspects.length];
+        const lens = reflectionLenses[index % reflectionLenses.length];
+        const key = `reflection_${index + 1}`;
+        return {
+          key,
+          title: lens.title.replace("{aspect}", aspect),
+          hint: `围绕「${profile.focus}」做自我梳理。请选择最贴近当前情况的一项；这是自我观察，不是经过验证的心理量表或人格测验。`,
+          type: "radio",
+          options: lens.options.map((title, value) => ({ title, value: value + 1 })),
+          reflectionQuestion: true,
+          reflectionAspect: aspect,
+          reflectionStyle: index % reflectionLenses.length
+        };
+      });
+      return [...base, ...reflections];
+    }
+
+    function adaptiveQuestionTitle(question) {
+      const activeIndex = questions.indexOf(question);
+      const previousInRound = questions.slice(0, activeIndex).reverse()
+        .find((item) => Object.prototype.hasOwnProperty.call(answers, item.key) && answers[item.key] !== "");
+      const previous = previousInRound || (isFollowUpRound
+        ? [...questionPool].reverse().find((item) =>
+          item.key !== question.key
+          && Object.prototype.hasOwnProperty.call(answers, item.key)
+          && answers[item.key] !== ""
+        )
+        : undefined);
+      if (!previous) return question.title;
+      if (question.gameQuestion && previous.gameQuestion) {
+        const previousAction = answers[previous.key];
+        const previousChance = previous.winProbabilities[previousAction];
+        const optimalChance = Math.max(...Object.values(previous.winProbabilities));
+        const actionLabel = previous.options.find((option) => option.value === previousAction)?.title || "当前选择";
+        return `上一轮选择「${actionLabel}」，按假设模型胜率 ${formatPercent(previousChance)}；本轮最高可达 ${formatPercent(optimalChance)}。\n${question.title}`;
+      }
+      if (!question.reflectionQuestion) return question.title;
+      const previousOption = previous.options?.find((option) => option.value === answers[previous.key]);
+      if (!previousOption) return question.title;
+      const branch = typeof answers[previous.key] === "number"
+        ? answers[previous.key] <= 2 ? "low" : answers[previous.key] >= 4 ? "high" : "middle"
+        : "middle";
+      const lead = branch === "low"
+        ? `你刚才在「${previous.reflectionAspect || previous.title}」选择了「${previousOption.title}」。`
+        : branch === "high"
+          ? `你刚才对「${previous.reflectionAspect || previous.title}」比较有把握（「${previousOption.title}」）。`
+          : `结合你刚才对「${previous.reflectionAspect || previous.title}」的选择（「${previousOption.title}」），`;
+      const prompt = branch === "low"
+        ? `关于「${question.reflectionAspect}」，你现在最想优先弄清什么？`
+        : branch === "high"
+          ? `关于「${question.reflectionAspect}」，哪项信息最能核实你的判断？`
+          : question.title;
+      return `${lead} ${prompt}`;
+    }
+
+    function adaptNextQuestion(currentQuestion) {
+      const remaining = questions.slice(questionIndex + 1);
+      if (!remaining.length) return;
+      let preferred;
+      if (currentQuestion.gameQuestion) {
+        const pickedChance = currentQuestion.winProbabilities[answers[currentQuestion.key]];
+        const bestChance = Math.max(...Object.values(currentQuestion.winProbabilities));
+        const sameGame = remaining.filter((question) => question.gameType === currentQuestion.gameType);
+        preferred = pickedChance < bestChance
+          ? sameGame.find((question) => question.difficulty <= currentQuestion.difficulty) || sameGame[0]
+          : sameGame.find((question) => question.difficulty > currentQuestion.difficulty)
+            || remaining.find((question) => question.difficulty > currentQuestion.difficulty);
+      } else if (currentQuestion.reflectionQuestion) {
+        const currentValue = Number(answers[currentQuestion.key]);
+        const preferredStyles = currentValue <= 2 ? [3, 1, 2, 4, 0] : currentValue >= 4 ? [1, 2, 4, 3, 0] : [2, 1, 3, 4, 0];
+        preferred = preferredStyles
+          .map((style) => remaining.find((question) =>
+            question.reflectionQuestion
+            && question.reflectionAspect === currentQuestion.reflectionAspect
+            && question.reflectionStyle === style
+          ))
+          .find(Boolean);
+      }
+      if (!preferred) return;
+      const preferredIndex = questions.indexOf(preferred);
+      const nextIndex = questionIndex + 1;
+      [questions[nextIndex], questions[preferredIndex]] = [questions[preferredIndex], questions[nextIndex]];
+    }
     const evidenceLabels = { strong: "有公开数据或明确规则", some: "有少量相似经验或线索", little: "主要是直觉或暂时没有资料" };
     const controlLabels = { high: "可以采取不少行动", some: "能影响其中一部分", low: "大多由外部条件决定" };
     const factorLabels = { days: "可用复习时间", practice: "练习与自测", mock: "掌握程度的验证", routine: "休息与精力", plan: "计划清晰度" };
@@ -357,25 +824,31 @@
     const screens = [...document.querySelectorAll(".screen")];
     const optionList = document.getElementById("options");
     const errorMessage = document.getElementById("question-error");
+    const questionLimits = { simple: 20, precise: 50 };
     let scenario = "study";
     let analysisMode = "simple";
     let questions = scenarioData.study.questions;
+    let questionPool = scenarioData.study.questions;
     let questionIndex = 0;
+    let isFollowUpRound = false;
+    let unsubmittedQuestionTitle = "";
     let buddyMessageIndex = 0;
     const participantMessages = {
-      home: ["嗨，我是小罗，想分析哪件事？", "有依据我们就算，没有依据也会告诉你。", "替朋友代问也可以，记得先征得同意哦。"],
+      home: ["欢迎来到牌桌。你想先揭开什么未知？", "看清规则，再决定下一步。", "每张牌都是线索，不是命运判词。"],
       quiz: ["慢慢来，信息越清楚，分析越有帮助。", "不确定的地方可以如实回答。", "一步一步来，我们一起拆解。"],
       result: ["这里展示的是依据和假设，不是命运预言。", "结果不确定时，我们也会把未知说明白。", "挑一个你能做的小行动，先从那里开始。"]
     };
 
     function buddySay(message) {
       document.getElementById("buddy-message").textContent = message;
-      document.getElementById("buddy-button").setAttribute("aria-label", `小罗说：${message} 点击听我说一句`);
+      document.getElementById("buddy-button").setAttribute("aria-label", `小丑面具说：${message} 点击听我说一句`);
     }
 
     function showScreen(id) {
       screens.forEach((screen) => screen.classList.toggle("active", screen.id === id));
       window.scrollTo({ top: 0, behavior: "smooth" });
+      const heading = document.querySelector(`#${id} h1, #${id} h2`);
+      if (heading) heading.focus({ preventScroll: true });
     }
 
     function makeField(question) {
@@ -407,6 +880,10 @@
       input.value = answers[question.key] ?? "";
       input.required = !question.optional;
       input.setAttribute("aria-label", question.title);
+      input.addEventListener("input", () => {
+        delete answers[question.key];
+        errorMessage.textContent = "";
+      });
       wrap.append(label, input);
       if (question.help) {
         const help = document.createElement("span");
@@ -417,19 +894,48 @@
       return wrap;
     }
 
+    function questionSuit(question) {
+      if (question.gameQuestion) {
+        return question.gameType === "prison" || question.gameType === "stag"
+          ? { symbol: "♣", label: "博弈", className: "club" }
+          : { symbol: "♠", label: "策略", className: "spade" };
+      }
+      if (scenario === "love") return { symbol: "♥", label: "关系", className: "heart" };
+      if (scenario === "social") return { symbol: "♣", label: "互动", className: "club" };
+      if (scenario === "study") return { symbol: "♣", label: "学习", className: "club" };
+      if (scenario === "gacha") return { symbol: "♦", label: "抽卡", className: "diamond" };
+      if (scenario === "event" && ["baseRate", "trials", "evidence"].includes(question.key)) return { symbol: "♦", label: "概率", className: "diamond" };
+      if (scenario === "event" || scenario === "custom") return { symbol: "♠", label: "线索", className: "spade" };
+      return { symbol: "♦", label: "选择", className: "diamond" };
+    }
+
     function renderQuestion() {
       const question = questions[questionIndex];
-      document.getElementById("step-count").textContent = `${analysisMode === "simple" ? "简便" : "精确"}模式 · ${scenarioData[scenario].label} · 问题 ${questionIndex + 1} / ${questions.length}`;
+      const roundLabel = isFollowUpRound ? "追问补充" : `${analysisMode === "simple" ? "简便" : "精确"}模式`;
+      document.getElementById("step-count").textContent = `${roundLabel} · ${scenarioData[scenario].label} · 问题 ${questionIndex + 1} / ${questions.length} · 上限 ${questionLimits[analysisMode]} 题`;
       document.getElementById("progress-line").setAttribute("aria-valuemax", String(questions.length));
       document.getElementById("progress-line").setAttribute("aria-valuenow", String(questionIndex + 1));
       document.getElementById("progress-value").style.width = `${((questionIndex + 1) / questions.length) * 100}%`;
-      document.getElementById("question-title").textContent = question.title;
+      const card = document.getElementById("question-card");
+      const suit = questionSuit(question);
+      const rank = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"][questionIndex % 13];
+      card.className = `question-card ${suit.className}`;
+      document.getElementById("question-card-rank").textContent = rank;
+      document.querySelector("#question-card .question-card-corner.bottom .question-card-rank").textContent = rank;
+      document.getElementById("question-card-suit").textContent = suit.symbol;
+      document.getElementById("question-card-suit-bottom").textContent = suit.symbol;
+      document.getElementById("question-card-center").textContent = suit.symbol;
+      document.getElementById("question-card-label").textContent = suit.label;
+      document.getElementById("question-title").textContent = adaptiveQuestionTitle(question);
       document.getElementById("question-hint").textContent = question.hint || "";
       document.getElementById("back-button").textContent = questionIndex === 0 ? "退出" : "上一步";
       document.getElementById("next-button").innerHTML = questionIndex === questions.length - 1 ? "查看详细分析 <span aria-hidden=\"true\">→</span>" : "继续 <span aria-hidden=\"true\">→</span>";
       errorMessage.textContent = "";
       optionList.replaceChildren();
+      const guidance = document.getElementById("question-guidance");
       if (question.type === "radio") {
+        guidance.hidden = answers[question.key] !== undefined;
+        document.getElementById("next-button").disabled = answers[question.key] === undefined;
         question.options.forEach((option) => {
           const optionValue = option.value === undefined ? option.title : option.value;
           const button = document.createElement("button");
@@ -454,12 +960,21 @@
           button.append(copy, check);
           button.addEventListener("click", () => {
             answers[question.key] = optionValue;
-            renderQuestion();
+            optionList.querySelectorAll(".option").forEach((item, index) => {
+              const selected = question.options[index] === option;
+              item.classList.toggle("selected", selected);
+              item.setAttribute("aria-pressed", String(selected));
+            });
+            guidance.hidden = true;
+            document.getElementById("next-button").disabled = false;
+            errorMessage.textContent = "";
             buddySay("收到！这些信息会帮助我把分析做得更具体。");
           });
           optionList.append(button);
         });
       } else {
+        guidance.hidden = true;
+        document.getElementById("next-button").disabled = false;
         optionList.append(makeField(question));
       }
       buddySay(questionIndex === 0 ? "慢慢来，我陪你把问题理清楚。" : participantMessages.quiz[questionIndex % participantMessages.quiz.length]);
@@ -534,17 +1049,35 @@
     }
 
     function renderStudyResult() {
-      const weights = analysisMode === "simple"
-        ? { days: 25, practice: 40, plan: 35 }
-        : { days: 15, practice: 25, mock: 25, routine: 15, plan: 20 };
-      const factors = questions.map((question) => ({ key: question.key, value: Number(answers[question.key]) }));
-      const score = Math.round(factors.reduce((sum, factor) => sum + factor.value / 3 * weights[factor.key], 0));
-      const caption = score >= 75
-        ? "从你的回答看，已经建立了较好的准备基础。继续用练习发现薄弱点，并保持休息。"
-        : score >= 50
-          ? "目前有一些准备基础。挑一个最能改善的因素，采取一件具体行动。"
-          : "当前还有可调整的空间。先从最小的一步开始，不必把这个分数当成考试预测。";
-      addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 学习准备参考`, `${score} / 100`, caption);
+      const hasPreciseFactors = ["mock", "routine"].some((key) => answers[key] !== undefined && answers[key] !== "");
+      const weights = analysisMode === "precise" || hasPreciseFactors
+        ? { days: 15, practice: 25, mock: 25, routine: 15, plan: 20 }
+        : { days: 25, practice: 40, plan: 35 };
+      const factors = Object.keys(weights)
+        .filter((key) => answers[key] !== undefined && answers[key] !== "")
+        .map((key) => ({ key, value: Number(answers[key]) }));
+      const availableWeight = factors.reduce((sum, factor) => sum + weights[factor.key], 0);
+      const missingFactors = Object.keys(weights).filter((key) => answers[key] === undefined || answers[key] === "");
+      const isComplete = missingFactors.length === 0;
+      const score = availableWeight && isComplete
+        ? Math.round(factors.reduce((sum, factor) => sum + factor.value / 3 * weights[factor.key], 0) / availableWeight * 100)
+        : null;
+      if (!factors.length) {
+        addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 尚无可用回答 · 非通过率`, "暂不能评分", "至少回答一项学习准备问题后，才能整理阶段信息；这不是考试结果预测。");
+        addCard("下一步", "可以继续回答问题，或先回到首页重新开始。准备参考分不代表通过概率或考试结果。");
+        return;
+      }
+      if (isComplete) {
+        const caption = score >= 75
+          ? "从你的回答看，已经建立了较好的准备基础。继续用练习发现薄弱点，并保持休息。这不是概率或考试结果预测。"
+          : score >= 50
+            ? "目前有一些准备基础。挑一个最能改善的因素，采取一件具体行动。这不是概率或考试结果预测。"
+            : "当前还有可调整的空间。先从最小的一步开始；这个分数不是概率或考试结果预测。";
+        addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 启发式准备参考分 · 非通过率`, `${score} / 100`, caption);
+      } else {
+        addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 阶段性整理 · 非通过率`, `${factors.length} / ${Object.keys(weights).length} 项`, "这是基于已回答因素的阶段性整理；补齐当前模式的问题后才生成准备参考分。未回答项不会被视为低分，也不能据此推测考试结果。");
+      }
+      addCard("评分方法与边界", `${isComplete ? "将你的回答按 1–3 档映射后，使用预设权重汇总为 0–100 的准备参考分。" : "当前未生成准备参考分；补齐当前模式的问题后，才按预设权重汇总为准备参考分。"}权重为：${Object.entries(weights).map(([key, weight]) => `${factorLabels[key]} ${weight}%`).join("、")}。${!isComplete ? `本次仅整理 ${factors.length} / ${Object.keys(weights).length} 项已回答因素，未回答项不会被视为低分。` : ""}这个启发式分数未经考试结果数据校准，不是通过概率、成绩预测或对不同人的比较。`);
       const factorList = document.createElement("div");
       factors.forEach((factor) => {
         const row = node("div", "factor");
@@ -567,7 +1100,6 @@
         advice.append(row);
       });
       addCard("按当前情况优先尝试", advice);
-      addCard("解读边界", `这是${analysisMode === "simple" ? "根据少量回答生成的快速启发式参考" : "根据更多准备因素生成的启发式参考"}，只把回答按预设权重汇总；没有经过考试结果数据校准，不是通过率或考试结果预测。`);
       const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
       const fun = node("div", "fortune-card");
       fun.append(node("div", "eyebrow", "JUST FOR FUN · 趣味彩蛋"), node("h3", "", fortune[0]), node("p", "", fortune[1]), node("p", "fortune-note", "纯属娱乐，不用于预测真实事件。"));
@@ -575,27 +1107,38 @@
     }
 
     function renderGachaResult() {
+      const hasRate = answers.rate !== undefined && answers.rate !== "";
+      const hasPulls = answers.pulls !== undefined && answers.pulls !== "";
+      if (!hasRate || !hasPulls) {
+        addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 信息尚不完整`, "目前无法计算", "至少需要目标单抽概率和计划抽数；缺少的输入不会用猜测补齐。");
+        addCard("当前已知信息", `目标：${answers.target || "尚未填写"}\n目标单抽概率：${hasRate ? `${answers.rate}%` : "尚未填写"}\n计划抽数：${hasPulls ? answers.pulls : "尚未填写"}\n${!hasRate ? "请补充卡池公告中的目标单抽概率。" : ""}${!hasPulls ? "请补充计划抽数。" : ""}`);
+        addCard("下一步", "核对卡池公告中指定目标的单抽概率，并确定本次计划抽数与可承受的资源上限；补充后即可重新计算。");
+        return;
+      }
       const rate = Number(answers.rate) / 100;
       const pulls = Number(answers.pulls);
-      const pity = analysisMode === "precise" ? Number(answers.pity) : 0;
-      const progress = analysisMode === "precise" ? Number(answers.progress) : 0;
-      const targetGuaranteed = analysisMode === "precise" && answers.targetGuaranteed === "yes";
+      const hasPityRules = answers.pity !== undefined && answers.pity !== "";
+      const pity = hasPityRules ? Number(answers.pity) : 0;
+      const progress = answers.progress !== undefined && answers.progress !== "" ? Number(answers.progress) : 0;
+      const targetGuaranteed = answers.targetGuaranteed === "yes";
       const remaining = pity > 0 ? pity - progress : 0;
       let probability = probabilityAtLeastOnce(rate, pulls);
       if (targetGuaranteed && pity > 0 && pulls >= remaining) probability = 1;
       const target = answers.target;
-      const interpretation = probability >= 0.9
+      const interpretation = probability >= 1
+        ? "按你提供的概率和规则，模型结果为 100%；这依赖输入准确且卡池机制完整。"
+        : probability >= 0.9
         ? "在所填假设下，至少获得一次目标的计算概率较高；这仍不代表一定会发生。"
         : probability >= 0.5
           ? "在所填假设下，结果仍有明显不确定性；建议先确认资源上限，再决定是否抽取。"
           : "在所填假设下，未获得目标仍是更可能出现的结果。请先设定可承受的资源上限。";
       addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 抽卡条件概率`, formatPercent(probability), `计划抽取 ${pulls} 次，目标：${target}。${interpretation}`);
-      addCard("计算使用的条件", `目标单抽概率：${formatPercent(rate)}\n本次计划抽数：${pulls}\n${analysisMode === "simple" ? "简便模式暂不询问保底，按无保底的普通单抽概率计算。" : pity > 0 ? `保底阈值：${pity} 抽；当前进度：${progress} 抽；距离阈值还有 ${remaining} 抽。\n目标直保底：${targetGuaranteed ? "是" : answers.targetGuaranteed === "no" ? "否" : "不确定，按不保证目标处理"}` : "按你提供的信息：没有目标直保底机制。"}\n计算结果针对“至少获得一次指定目标”。`);
+      addCard("计算使用的条件", `目标单抽概率：${formatPercent(rate)}\n本次计划抽数：${pulls}\n${!hasPityRules ? "尚未补充保底规则，按无保底的普通单抽概率估算。" : pity > 0 ? `保底阈值：${pity} 抽；当前进度：${progress} 抽；距离阈值还有 ${remaining} 抽。\n目标直保底：${targetGuaranteed ? "是" : answers.targetGuaranteed === "no" ? "否" : "不确定，按不保证目标处理"}` : "按你提供的信息：没有目标直保底机制。"}\n计算结果针对“至少获得一次指定目标”。`);
       const formula = targetGuaranteed && pity > 0 && pulls >= remaining
         ? `你填写的规则表示，距离目标保底还需 ${remaining} 抽，且计划抽数足以到达该保底，因此模型结果为 100%。`
         : `按普通抽取固定概率近似：P(至少一次) = 1 − (1 − p)^n，其中 p = ${formatPercent(rate)}，n = ${pulls}。`;
-      addCard("计算方法", `${formula}\n${analysisMode === "precise" && pity > 0 ? "保底不保证目标或规则不确定时，不把它当作目标必得；只按普通目标单抽概率计算。" : ""}`);
-      addCard("重要假设与限制", `${analysisMode === "simple" ? "这是快速估算，暂未计入保底、软保底、歪后必得或概率递增机制。" : "假设每抽目标概率恒定、抽取彼此独立，且没有未输入的软保底、歪后必得或概率递增机制。"}若游戏公告机制不同，结果会偏离；请以该卡池官方规则为准。该计算不代表抽卡建议，也不应促使超出预算消费。`);
+      addCard("计算方法", `${formula}\n${pity > 0 && !targetGuaranteed ? "保底不保证目标或规则不确定时，不把它当作目标必得；只按普通目标单抽概率计算。" : ""}`);
+      addCard("重要假设与限制", `${hasPityRules && pity > 0 ? "已按你补充的硬保底输入处理；本模型仍未计算软保底、概率递增等未填写机制。" : "按固定单抽概率估算，暂未计入软保底、歪后必得或概率递增机制。"}若游戏公告机制不同，结果会偏离；请以该卡池官方规则为准。该计算不代表抽卡建议，也不应促使超出预算消费。`);
     }
 
     function renderEventResult() {
@@ -607,10 +1150,11 @@
         addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 基于你提供的基准率`, formatPercent(probability), `在 ${answers.trials} 次机会内至少发生一次的模型结果。注意：这不是对该事件真实发生率的独立验证。`);
         addCard("输入条件", `问题：${question}\n关注时间：${answers.horizon}\n你提供的单次基准概率：${answers.baseRate}%\n机会次数：${answers.trials}`);
         addCard("计算方法和限制", `采用 P(至少一次) = 1 − (1 − p)^n，p = ${answers.baseRate}%，n = ${answers.trials}。仅当基准率适用于类似情境、每次机会近似独立且概率不变时成立。\n现实事件常受共同因素影响，机会未必独立；请核对来源、样本范围和时间是否匹配。`);
+        addCard("下一步", "先核对基准率的来源、样本对象和时间范围是否与这件事相符，再判断各次机会是否真的近似独立。若这些条件不成立，把结果当作公式演示，不要解读为现实发生率；同时准备一项可控行动或备选方案。");
       } else {
         addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 证据梳理`, "目前无法可靠量化", "仅凭问题描述和有限线索，无法给出可信的发生概率；展示一个看似精确的百分比会误导你。");
-        addCard("你关心的情境", `问题：${question}\n时间范围：${answers.horizon}`);
-        addCard("现有依据", `证据情况：${evidenceLabels[answers.evidence]}\n你能影响的部分：${controlLabels[answers.control]}`);
+        addCard("你关心的情境", `问题：${question || "尚未填写"}\n时间范围：${answers.horizon || "尚未填写"}`);
+        addCard("现有依据", `证据情况：${evidenceLabels[answers.evidence] || "尚未填写"}\n你能影响的部分：${controlLabels[answers.control] || "尚未填写"}`);
         addCard("还缺少哪些信息", "• 清晰的事件定义：什么情况才算“发生”？\n• 可比较的样本：相似对象、相似条件下有多少次成功与未成功？\n• 时间与机会：统计周期是否和你关心的期限一致？\n• 关键条件：有哪些因素会明显改变结果？");
         addCard("下一步", answers.control === "high"
           ? "列出一项近期可采取的行动，并找一个可核实的资料来源。行动可以改善条件，但不能保证结果。"
@@ -619,7 +1163,7 @@
             : answers.control === "low"
               ? "优先寻找可靠的基准数据，或准备几个可能结果的应对方案。对暂时不可控的事件，不必把不确定性归因于运气。"
               : "先找一个能核实的资料来源，再把可能影响结果的因素列出来。暂时没有基准数据时，不把直觉当成概率。");
-        if (hasRate !== hasTrials) addCard("未使用不完整的数字输入", "基准概率和重复机会数需要同时提供；目前只填写了一项，因此没有据此计算，避免暗中补假设。");
+        if (hasRate !== hasTrials) addCard("未使用不完整的数字输入", `基准概率${hasRate ? "已填写" : "尚未填写"}，机会次数${hasTrials ? "已填写" : "尚未填写"}。两项需要同时提供才可计算；目前未据此计算，避免暗中补假设。`);
       }
     }
 
@@ -631,13 +1175,193 @@
         addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 自定义条件计算`, formatPercent(probability), `这是按你输入的基准概率和机会次数计算的数学结果，不是对现实情境的验证。`);
         addCard("你的问题与背景", `问题：${answers.question}\n补充情况：${answers.context}\n关注时间：${answers.horizon}\n依据类型：${evidenceLabels[answers.evidence]}`);
         addCard("计算方法与限制", `P(至少一次) = 1 − (1 − p)^n，p = ${answers.baseRate}%，n = ${answers.trials}。\n要求各次机会近似独立、概率稳定，且基准率适用于当前问题。若这些条件不成立，数值不应直接解读为现实机会。`);
+        addCard("下一步", "检查基准率是否对应相同的事件定义、对象和时间范围，并确认机会之间没有明显关联。如果依据不匹配，先寻找更合适的数据；再把你能采取的一项行动与无法控制的结果分开记录。");
       } else {
         addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 自定义情境拆解`, "先看依据，再谈概率", "我们先把问题、背景和证据分开；没有适用的基准数据时，不会替现实问题编造一个百分比。");
-        addCard("你的问题", `问题：${answers.question}\n关注时间：${answers.horizon}`);
-        addCard("补充情境", `你提供的信息：${answers.context}\n现有依据：${evidenceLabels[answers.evidence]}`);
+        addCard("你的问题", `问题：${answers.question || "尚未填写"}\n关注时间：${answers.horizon || "尚未填写"}`);
+        addCard("补充情境", `你提供的信息：${answers.context || "尚未填写"}\n现有依据：${evidenceLabels[answers.evidence] || "尚未填写"}`);
         addCard("进一步分析时可以核对", "• 明确成功或发生的判断标准。\n• 寻找与当前对象和时间范围匹配的数据。\n• 检查是否有遗漏的关键条件或相反证据。\n• 将可控行动与外部结果分开考虑。");
-        if (hasRate !== hasTrials) addCard("数字条件不足", "基准概率和机会次数需要同时提供，才可计算至少发生一次的概率；当前只填写了一项，因此未计算。");
+        if (hasRate !== hasTrials) addCard("数字条件不足", `基准概率${hasRate ? "已填写" : "尚未填写"}，机会次数${hasTrials ? "已填写" : "尚未填写"}。两项需要同时提供，才可计算至少发生一次的概率；目前未计算。`);
       }
+    }
+
+    function renderReflectionResult() {
+      const profile = reflectionProfiles[scenario];
+      const answeredReflections = questionPool.filter((question) => question.reflectionQuestion && answers[question.key] !== undefined);
+      const lowResponses = answeredReflections.filter((question) => Number(answers[question.key]) <= 2);
+      const highResponses = answeredReflections.filter((question) => Number(answers[question.key]) >= 4);
+      const missingCoreAnswers = questionPool.filter((question) => !question.reflectionQuestion && answers[question.key] === undefined);
+      addSummary(
+        `${analysisMode === "simple" ? "简便" : "精确"}模式 · ${profile.focus}自我梳理`,
+        `${answeredReflections.length} 项已答`,
+        `这份结果根据你对「${profile.focus}」的回答，提供情境性的心理学自我观察；不是心理诊断、经过验证的人格测验，也不能推断他人的想法或未来。${missingCoreAnswers.length ? `还有 ${missingCoreAnswers.length} 项背景题未回答。` : ""}`
+      );
+      const lowAspectSummary = lowResponses.length
+        ? `在“${[...new Set(lowResponses.map((question) => question.reflectionAspect))].slice(0, 5).join("、")}”上，你较多选择了较低档位；目前可能还需要一些支持、信息或启动空间。`
+        : "本次回答中没有明显集中在较低档位的方面。";
+      const highAspectSummary = highResponses.length
+        ? `在“${[...new Set(highResponses.map((question) => question.reflectionAspect))].slice(0, 5).join("、")}”上，你较多选择了较高档位，已有一些可以依靠的行动或判断基础。`
+        : "本次回答中没有明显集中在较高档位的方面。";
+      addCard("回答线索", `${lowAspectSummary}\n${highAspectSummary}\n它们是本次自我报告中的线索，不是心理量表分数、性格定论或成功概率。`);
+      const outcomeKeys = { love: "loveOutcome", social: "socialOutcome", career: "careerOutcome" };
+      if (outcomeKeys[scenario]) addCard("希望实现的结果", answers[outcomeKeys[scenario]] || "尚未填写具体结果；可以先把希望发生的变化描述得更清楚。");
+      const reflectionValues = (style) => answeredReflections
+        .filter((question) => question.reflectionStyle === style)
+        .map((question) => Number(answers[question.key]));
+      const meanOf = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+      const actionReadiness = meanOf([...reflectionValues(0), ...reflectionValues(3)]);
+      const selfEfficacy = meanOf(reflectionValues(2));
+      const evidenceAwareness = meanOf([...reflectionValues(1), ...reflectionValues(4)]);
+      const describeSignal = (value, low, high) => {
+        if (value === null) return "目前相关回答不足，暂时先不作判断。";
+        if (value <= 2.4) return low;
+        if (value >= 3.6) return high;
+        return "回答呈现混合状态：有些部分已有基础，另一些仍在摸索；这很常见，也会随情境变化。";
+      };
+      const actionSignal = describeSignal(
+        actionReadiness,
+        "你可能正处在准备或启动阶段；这不等于缺乏能力，任务太大、精力不足或条件不合适都可能让行动变难。",
+        "在这件事上，你报告了较多行动或计划基础；可以继续靠小步尝试和复盘保持节奏，不必要求自己事事完美。"
+      );
+      const efficacySignal = describeSignal(
+        selfEfficacy,
+        "你目前感到自己能影响的部分可能有限；这反映的是当前处境和主观可控感，不是能力不足，更不代表结果该由你独自负责。",
+        "你报告了较强的可控感。它可以帮助你采取行动；也请把外部因素留在视野里，别把不可控结果都归咎于自己。"
+      );
+      const evidenceSignal = describeSignal(
+        evidenceAwareness,
+        "目前可用的依据或辨别事实与推测的把握可能还不够；先补一条可靠信息，通常比反复猜测更有帮助。",
+        "你报告了较好的证据意识；继续区分已知、推测和未知，并允许新证据改变原来的看法。"
+      );
+      addCard("心理学视角：此刻的状态与做事线索", `行动准备：${actionSignal}\n主观可控感（自我效能感相关线索）：${efficacySignal}\n证据与不确定性意识：${evidenceSignal}\n\n这些描述只针对当前的「${profile.focus}」及已回答项目；不能据此判断稳定性格或给人贴标签。${resultAudience() === "帮别人代问" ? "如果这些答案是替他人填写，结果只反映填答者的观察；应让当事人自行确认，不要把它当作对其心理的判断。" : ""}`);
+      const dimensions = [
+        { name: "行动准备", value: actionReadiness },
+        { name: "主观可控感", value: selfEfficacy },
+        { name: "证据与不确定性意识", value: evidenceAwareness }
+      ].filter((dimension) => dimension.value !== null);
+      const lowestDimension = dimensions.sort((first, second) => first.value - second.value)[0];
+      let encouragement;
+      if (!lowestDimension) {
+        encouragement = "你愿意停下来梳理这件事，已经是一个有价值的开始。先回答一两道自我观察题，或写下此刻最想改变的一小点；不必立刻解决全部问题。";
+      } else if (lowestDimension.name === "行动准备" && lowestDimension.value <= 2.4) {
+        encouragement = `你不需要等到完全准备好才开始。为「${profile.focus}」选一个 10 分钟内能完成、失败成本很低的小步骤，并写下“如果到了____，我就先做____”。做完只记录发生了什么，不用评判自己。`;
+      } else if (lowestDimension.name === "主观可控感" && lowestDimension.value <= 2.4) {
+        encouragement = `遇到不确定时觉得难推进，并不代表你不够好。把「${profile.focus}」分成“我能影响的”和“我暂时不能控制的”两栏，只从前一栏挑一个最小行动；需要时也可以寻求可信任的人支持。`;
+      } else if (lowestDimension.name === "证据与不确定性意识" && lowestDimension.value <= 2.4) {
+        encouragement = `不必靠反复担心来获得确定感。试着把「${profile.focus}」写成三栏：“已知事实、我的推测、还需核实”；然后只查证一个最关键的问题，再决定下一步。`;
+      } else {
+        encouragement = `你已经在「${profile.focus}」上展现出可用的资源。给自己一点肯定，再选一件具体、可控的小事推进；如果暂时没有进展，调整方法或休息也算照顾好自己。`;
+      }
+      addCard("给你的鼓励与提升方案", encouragement);
+      const research = document.createElement("p");
+      research.className = "field-help";
+      research.textContent = "参考概念：自我效能感（Bandura, 1977）关注“我能否采取行动”的信念；执行意图（Gollwitzer, 1999）提示把目标写成“如果情境 X 出现，我就做 Y”。这里借用概念帮助自我反思，不代表本问卷经过心理测量验证。";
+      const sources = document.createElement("p");
+      sources.className = "field-help";
+      const selfEfficacySource = node("a", "", "Bandura (1977)");
+      selfEfficacySource.href = "https://doi.org/10.1037/0033-295X.84.2.191";
+      selfEfficacySource.target = "_blank";
+      selfEfficacySource.rel = "noopener noreferrer";
+      const intentionSource = node("a", "", "Gollwitzer (1999)");
+      intentionSource.href = "https://doi.org/10.1037/0003-066X.54.7.493";
+      intentionSource.target = "_blank";
+      intentionSource.rel = "noopener noreferrer";
+      sources.append(selfEfficacySource, document.createTextNode(" · "), intentionSource);
+      const references = document.createElement("div");
+      references.append(research, sources);
+      addCard("心理学概念与参考文献", references);
+      addCard("概率边界与提升方向", "这份自我梳理没有可比较的基准率或足够样本，因此不能计算实际成功概率，也不能预测他人的选择。明确目标、核实信息、采取可控且低风险的行动并观察反馈，可能改善实现目标的条件，但不保证结果。");
+      if (scenario === "love") {
+        const boundaryAnswer = answers.relationshipBoundary;
+        const boundaryQuestion = loveQuestions.find((question) => question.key === "relationshipBoundary");
+        const reportsUnsafe = boundaryAnswer === boundaryQuestion.options[3].title;
+        addCard(reportsUnsafe ? "先照顾安全" : "温和的下一步", reportsUnsafe
+          ? "你表示相处中感到不安全或受到强迫。请把安全放在关系判断之前；如果可能，联系你信任的人或当地专业支持，避免独自面对可能升级的情境。若有即时危险，请联系当地紧急服务。问卷无法评估具体风险，也不会替你做决定。"
+          : "把注意力放在可观察、持续且互相尊重的沟通与行动上；如果你愿意，可以用不施压的方式说清自己的期待并听取回应。问卷不能算出对方喜欢你的概率，也不能替对方表达心意。若你感到受威胁、被控制或不安全，请优先联系可信任的人或当地专业支持。");
+      } else if (scenario === "social") {
+        addCard("可以试试", "选一个低风险的真实场景，用“我感到……我希望……”表达自己的体验，再确认对方的理解。边界可以被讨论；你不必为了维持关系而忽略安全或基本尊重。");
+      } else {
+        addCard("把思考变成下一步", "写下你最重视的两项标准、目前最关键的信息缺口，以及一个低成本、可撤回的小尝试。行动可以帮助你收集信息，但不能保证结果。");
+      }
+    }
+
+    function renderLogicResult() {
+      const answered = questionPool.filter((question) =>
+        question.gameQuestion && Object.prototype.hasOwnProperty.call(answers, question.key)
+      );
+      if (!answered.length) {
+        addSummary(`${analysisMode === "simple" ? "简便" : "精确"}模式 · 博弈策略 · 模型胜率`, "尚无可计算选择", "先完成至少一个情景选择；未回答的博弈不会计入胜率，也不会被当成输局。");
+        addCard("下一步", "继续作答，或从一个明确的经典情景开始。每题都会说明规则、对手行为假设和适用边界。");
+        addCard("来源与模型", "题目是依据经典博弈结构改写的教学情景，不复制原题文本。策略建议仅在题面声明的收益、规则和对手模型下成立。");
+        return;
+      }
+      const outcomes = answered.map((question) => {
+        const action = answers[question.key];
+        return {
+          question,
+          action,
+          selectedChance: question.winProbabilities[action],
+          optimalChance: Math.max(...Object.values(question.winProbabilities)),
+          recommendation: question.recommendation
+        };
+      });
+      const winChance = outcomes.reduce((sum, outcome) => sum + outcome.selectedChance, 0) / outcomes.length;
+      const bestChance = outcomes.reduce((sum, outcome) => sum + outcome.optimalChance, 0) / outcomes.length;
+      const upgradeCount = outcomes.filter((outcome) => outcome.selectedChance + Number.EPSILON < outcome.optimalChance).length;
+      addSummary(
+        `${analysisMode === "simple" ? "简便" : "精确"}模式 · 条件模型胜率 · 非现实保证`,
+        formatPercent(winChance),
+        `你完成了 ${answered.length} / ${questionPool.length} 道情景题。此百分比是“从已答题目中等概率抽取一轮”的平均胜率；按每题模型选择最高胜率策略时，平均可达 ${formatPercent(bestChance)}。`
+      );
+      const detailList = document.createElement("div");
+      outcomes.forEach((outcome, index) => {
+        const row = node("div", "factor");
+        const top = node("div", "factor-top");
+        const chosen = outcome.question.options.find((option) => option.value === outcome.action)?.title || String(outcome.action);
+        const recommended = outcome.question.options.find((option) => option.value === outcome.recommendation)?.title || String(outcome.recommendation);
+        top.append(node("span", "", `${index + 1}. ${gameModels[outcome.question.gameType].name} · 选择：${chosen}`), node("span", "", `胜率 ${formatPercent(outcome.selectedChance)}`));
+        const note = node("p", "field-help", outcome.selectedChance + Number.EPSILON < outcome.optimalChance
+          ? `该模型下可提升至 ${formatPercent(outcome.optimalChance)}：${recommended}。`
+          : `本题的最高模型胜率策略之一：${recommended}。`);
+        row.append(top, note);
+        detailList.append(row);
+      });
+      addCard("每轮结果与可提升空间", detailList);
+      addCard("如何提高模型下的胜率", upgradeCount
+        ? `${upgradeCount} 道已答题的选择低于该题的最高模型胜率。优先查看这些题的收益规则和对手行为频率；在假设成立时改用结果卡列出的策略，已答题平均胜率可从 ${formatPercent(winChance)} 提升到约 ${formatPercent(bestChance)}。不要把这一改进外推到题面模型之外。`
+        : `你在已答题目中均选择了模型胜率最高的策略。平均模型胜率为 ${formatPercent(bestChance)}；继续检查对手模型是否可信，遇到会适应你的对手时避免固定行动。`);
+      addCard(
+        "决策心理学视角：本轮状态与练习",
+        upgradeCount
+          ? `这轮推演中，你有 ${upgradeCount} 次选择与题目模型下的最高胜率策略不同。一次选择不代表判断力或性格；可能只是目标不同、规则没看清，或你在尝试另一种策略。下一轮先写下“我想提高的是获胜机会还是平均收益”，再核对对手行为假设，最后根据结果复盘。你在练习比较证据与策略，这本身就是进步。`
+          : "这轮推演中，你的选择都符合题目模型给出的最高胜率策略，说明你能把规则和选择对应起来。给自己一点肯定；下一步可以检验对手假设是否可靠。即使选得理想，也不代表现实对局一定获胜，更不能据此判断固定性格。"
+      );
+      const modelsList = document.createElement("ul");
+      modelsList.className = "detail-copy";
+      const gameTypes = [...new Set(answered.map((question) => question.gameType))];
+      gameTypes.forEach((gameType) => {
+        const item = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = gameModels[gameType].sourceUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = gameModels[gameType].source;
+        item.append(link);
+        modelsList.append(item);
+      });
+      addCard("经典题型与来源", modelsList);
+      const strategyNotes = document.createElement("div");
+      gameTypes.forEach((gameType) => {
+        const question = answered.find((item) => item.gameType === gameType);
+        const section = node("div", "factor");
+        section.append(
+          node("h4", "", gameModels[gameType].name),
+          node("p", "detail-copy", `${question.method}\n策略边界：${question.assumptions}`)
+        );
+        strategyNotes.append(section);
+      });
+      addCard("策略拆解与提高胜率的方法", strategyNotes);
+      addCard("模型假设与边界", "每题中的对手频率与规则均是明确标出的假设，不是对真实对手的观测事实。平均胜率只针对已回答题目；不同题的赔率/收益结构不同，因此它不是整场全胜的概率，也不保证现实结果。若对手会学习、规则改变或频率估计不可靠，重新估计并调整策略。");
     }
 
     function buildResult() {
@@ -649,6 +1373,16 @@
       if (scenario === "gacha") renderGachaResult();
       if (scenario === "event") renderEventResult();
       if (scenario === "custom") renderCustomResult();
+      if (scenario === "logic") renderLogicResult();
+      if (reflectionProfiles[scenario]) renderReflectionResult();
+      const answeredCount = questionPool.filter((question) => Object.prototype.hasOwnProperty.call(answers, question.key)).length;
+      const availableQuestions = questionPool.length;
+      const remainingCount = availableQuestions - answeredCount;
+      addCard("本次问答", `已回答 ${answeredCount} / ${availableQuestions} 项可用问题。题数上限为简便模式 ${questionLimits.simple} 题、精确模式 ${questionLimits.precise} 题；未回答项不作为负面依据。${remainingCount ? `还可继续追问 ${remainingCount} 项已有条件。` : ""}${unsubmittedQuestionTitle ? `当前题“${unsubmittedQuestionTitle}”未有效提交，未纳入分析。` : ""}这些上限不会让系统自动生成或强迫填写无关问题。`);
+      unsubmittedQuestionTitle = "";
+      document.getElementById("follow-up-button").textContent = remainingCount
+        ? `继续追问（还有 ${remainingCount} 项）`
+        : "修改回答后重新分析";
       document.getElementById("toast").textContent = "";
       buddySay(scenario === "gacha"
         ? "这是按卡池条件算出的概率，先确认保底规则和预算哦。"
@@ -677,11 +1411,14 @@
           item.classList.toggle("selected", selected);
           item.setAttribute("aria-checked", String(selected));
         });
-        document.getElementById("start-button").innerHTML = `开始${analysisMode === "simple" ? "简便" : "精确"}分析 <span aria-hidden="true">→</span>`;
+        document.getElementById("start-button").innerHTML = `开始${analysisMode === "simple" ? "简便" : "精确"}推演 <span aria-hidden="true">→</span>`;
       });
     });
     document.getElementById("start-button").addEventListener("click", () => {
-      questions = scenarioData[scenario].questions.filter((question) => analysisMode === "precise" || !question.preciseOnly);
+      questionPool = buildQuestionPool(scenario, analysisMode);
+      questions = [...questionPool];
+      isFollowUpRound = false;
+      unsubmittedQuestionTitle = "";
       Object.keys(answers).forEach((key) => delete answers[key]);
       questionIndex = 0;
       renderQuestion();
@@ -689,11 +1426,17 @@
     });
     document.getElementById("back-button").addEventListener("click", () => {
       if (questionIndex === 0) {
-        showScreen("home");
+        showScreen(isFollowUpRound ? "result" : "home");
         return;
       }
       questionIndex -= 1;
       renderQuestion();
+      document.getElementById("question-title").focus({ preventScroll: true });
+    });
+    document.getElementById("finish-button").addEventListener("click", () => {
+      unsubmittedQuestionTitle = "";
+      if (!commitCurrentAnswer()) unsubmittedQuestionTitle = questions[questionIndex].title;
+      buildResult();
     });
     document.getElementById("next-button").addEventListener("click", () => {
       if (!commitCurrentAnswer()) return;
@@ -703,6 +1446,10 @@
       }
       if (scenario === "gacha" && questions[questionIndex].key === "progress" && Number(answers.pity) === 0 && Number(answers.progress) !== 0) {
         errorMessage.textContent = "已选择无目标保底时，请将保底进度填为 0。";
+        return;
+      }
+      if (scenario === "gacha" && questions[questionIndex].key === "targetGuaranteed" && answers.targetGuaranteed === "yes" && Number(answers.pity) === 0) {
+        errorMessage.textContent = "选择“保底直接给目标”时，请先填写有效的保底阈值；如果没有目标保底，请选择其他选项。";
         return;
       }
       if (scenario !== "gacha" && ["event", "custom"].includes(scenario) && questions[questionIndex].key === "trials") {
@@ -716,8 +1463,10 @@
         }
       }
       if (questionIndex < questions.length - 1) {
+        adaptNextQuestion(questions[questionIndex]);
         questionIndex += 1;
         renderQuestion();
+        document.getElementById("question-title").focus({ preventScroll: true });
       } else {
         buildResult();
       }
@@ -725,26 +1474,67 @@
     document.getElementById("retry-button").addEventListener("click", () => {
       Object.keys(answers).forEach((key) => delete answers[key]);
       questionIndex = 0;
-      questions = scenarioData[scenario].questions.filter((question) => analysisMode === "precise" || !question.preciseOnly);
+      unsubmittedQuestionTitle = "";
+      questionPool = buildQuestionPool(scenario, analysisMode);
+      questions = [...questionPool];
+      isFollowUpRound = false;
+      renderQuestion();
+      showScreen("quiz");
+    });
+    document.getElementById("follow-up-button").addEventListener("click", () => {
+      const unanswered = questionPool.filter((question) => !Object.prototype.hasOwnProperty.call(answers, question.key));
+      questions = unanswered.length ? unanswered : questionPool;
+      questionIndex = 0;
+      isFollowUpRound = true;
       renderQuestion();
       showScreen("quiz");
     });
     document.getElementById("home-button").addEventListener("click", () => showScreen("home"));
     document.getElementById("copy-button").addEventListener("click", async () => {
-      const text = `概率罗盘｜${scenarioData[scenario].label}分析\n${document.getElementById("result-content").innerText}`;
+      const summary = document.querySelector("#result-content .result-head");
+      const text = `概率罗盘｜${scenarioData[scenario].label}分析\n${summary ? summary.innerText : ""}`;
       const toast = document.getElementById("toast");
       try {
         await navigator.clipboard.writeText(text);
         toast.textContent = "分析摘要已复制，可自行转发给对方。";
-      } catch (error) {
-        toast.textContent = "复制不可用时，可以截图保存这页的分析。";
+      } catch (clipboardError) {
+        const fallback = document.createElement("textarea");
+        fallback.value = text;
+        fallback.setAttribute("readonly", "");
+        fallback.style.position = "fixed";
+        fallback.style.opacity = "0";
+        document.body.append(fallback);
+        fallback.select();
+        let copied = false;
+        try {
+          copied = document.execCommand("copy");
+        } catch (fallbackError) {
+          console.error("无法复制分析摘要。", clipboardError, fallbackError);
+        }
+        fallback.remove();
+        toast.textContent = copied
+          ? "分析摘要已复制，可自行转发给对方。"
+          : "复制失败，请手动选择并复制结论摘要。";
       }
     });
     document.getElementById("buddy-button").addEventListener("click", () => {
       const screen = screens.find((item) => item.classList.contains("active"));
       const messages = screen ? participantMessages[screen.id] : participantMessages.home;
       buddyMessageIndex = (buddyMessageIndex + 1) % messages.length;
-      buddySay(messages[buddyMessageIndex]);
+      const message = messages[buddyMessageIndex];
+      buddySay(message);
+      if ("speechSynthesis" in window && "SpeechSynthesisUtterance" in window) {
+        window.speechSynthesis.cancel();
+        const speech = new SpeechSynthesisUtterance(message);
+        speech.lang = "zh-CN";
+        speech.pitch = 1.12;
+        speech.rate = 0.96;
+        const buddyButton = document.getElementById("buddy-button");
+        speech.onstart = () => buddyButton.classList.add("speaking");
+        speech.onend = () => buddyButton.classList.remove("speaking");
+        speech.onerror = () => buddyButton.classList.remove("speaking");
+        window.speechSynthesis.speak(speech);
+      }
     });
   </script>
 </body>
